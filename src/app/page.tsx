@@ -1,151 +1,327 @@
+'use client';
+
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
-export default function Home() {
+interface GO {
+  id: string;
+  title: string;
+  organizer: string;
+  image: string;
+  currentParticipants: number;
+  maxParticipants: number;
+  price: number;
+  originalPrice?: number;
+  endTime: string;
+  isPopular?: boolean;
+  isLiked: boolean;
+}
+
+const mockGOs: GO[] = [
+  {
+    id: '1',
+    title: "NewJeans 'Get Up' Bunny Beach Bag Ver.",
+    organizer: 'NJFanClub',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDaH4ZrWBEGk0q1kOKq5u1vWmeDZwZSK2sZc-y1b0Ckg9uWK0TlTRw_i_ubvewF9cOdrlUd2yyEMAoz4bB8yVTTKIdLCVgK1lCIDj_JSa3I4Kuf_6oEyiPs0D4j8OfEFCl99kniXbRovUsONYR_6YEkNJ77H7gxBKlwEvQxBzGSl7_6VDsJajKFybsTo4iojpOLaz6imhKL_mIxQErYsuUswibG4H1_1z5H8OQS_qupspugTD2X5TmXRxU0hqdOHZ3AijthjOj0Da-Q',
+    currentParticipants: 85,
+    maxParticipants: 100,
+    price: 25.00,
+    originalPrice: 30.00,
+    endTime: '7d 12h',
+    isLiked: false,
+  },
+  {
+    id: '2',
+    title: 'LE SSERAFIM Official Light Stick',
+    organizer: 'FearnotGOs',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuApYkfr6XU6UlpRZ_FaZCL0IYgtCDEbbwz73-0G7lKKdw-XC_JDd7ktC3R64bKIyvt1DpTnj0ehqhYlN4TGBcmjU5yB6WzqdNgWi_r9blz95BDfG4t3Xvoe8gqEBbhBs8yJUv9w9_bQg1xKJ6ReIIyRYn3fGxpXTmZrgTpjrysWN37wAUenDh8aIV4aVnNArW1k-vNNLoFEad9AxLHHxXkadRvUtkhEbgy8fHj3_YVWzs-6Jby8htGHtBP7FPdkvqX_IS3Svkxa4Rc7',
+    currentParticipants: 192,
+    maxParticipants: 200,
+    price: 50.00,
+    originalPrice: 55.00,
+    endTime: '3d 5h',
+    isPopular: true,
+    isLiked: true,
+  },
+  {
+    id: '3',
+    title: "aespa 'Armageddon' Exclusive Photocards",
+    organizer: 'MYCollectibles',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAmn11B0bR6PHc_O--Sbi-mVUepsCN0UTz2hpvFAeGKDTnwRWM2jaKDl4CNr7dVy5WQ0vNjxx56BwP3L2ox_X3dU1gkvLPe2Zz9k9JU3GgZkSHIauf1gVmPk9zVS1pfs6ztZv0eBkyOBhuD-X5i5ysu1wk1EMmhShrtDn79t2pahkFejqv8dTK9-b5h5dG5bWt7DGUEM_TF_U9fU3tOmlYmd99iZarzGyJvl81YEtoX1m6BJosTM5kVR_ZxebvyFX9X2id1odPL1_n6',
+    currentParticipants: 45,
+    maxParticipants: 150,
+    price: 12.00,
+    endTime: '10d 2h',
+    isLiked: false,
+  },
+];
+
+export default function GOs() {
+  const [gos, setGos] = useState<GO[]>(mockGOs);
+  const [celebratingItems, setCelebratingItems] = useState<Set<string>>(new Set());
+
+  const toggleLike = (id: string) => {
+    setGos(prev => prev.map(go => 
+      go.id === id ? { ...go, isLiked: !go.isLiked } : go
+    ));
+    
+    // Add celebration effect
+    setCelebratingItems(prev => new Set(prev).add(id));
+    setTimeout(() => {
+      setCelebratingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }, 600);
+  };
+
+  const joinGO = (id: string) => {
+    // Add celebration and feedback
+    const button = document.querySelector(`[data-join="${id}"]`);
+    button?.classList.add('join-celebrate');
+    setTimeout(() => button?.classList.remove('join-celebrate'), 800);
+  };
+
   return (
-    <div className="container mx-auto p-8 space-y-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tighter">IdolWorldStore</h1>
-        <p className="text-xl text-muted-foreground">
-          Next.js 15 + Tailwind CSS v4 + ShadCN/UI + React 19
-        </p>
-        <div className="flex gap-2 justify-center">
-          <Badge variant="default">Next.js 15</Badge>
-          <Badge variant="secondary">Tailwind v4</Badge>
-          <Badge variant="outline">ShadCN/UI</Badge>
-          <Badge variant="destructive">React 19</Badge>
-        </div>
-      </div>
+    <>
+      <style jsx global>{`
+        .heart-icon {
+          color: #A1A1AA;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .heart-icon.liked {
+          color: #7f23fd;
+          filter: drop-shadow(0 0 8px rgba(127, 35, 253, 0.6));
+        }
+        
+        .heart-icon:active {
+          transform: scale(1.3);
+        }
+        
+        .heart-celebrate {
+          animation: heart-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes heart-bounce {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.4) rotate(15deg); }
+          100% { transform: scale(1); }
+        }
+        
+        .popular-badge {
+          animation: pulse-badge 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+        
+        @keyframes pulse-badge {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+          }
+          70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 7px rgba(220, 38, 38, 0);
+          }
+        }
+        
+        .progress-bar-fill {
+          background: linear-gradient(90deg, #7f23fd, #a855f7);
+          transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 0 10px rgba(127, 35, 253, 0.3);
+        }
+        
+        .join-celebrate {
+          animation: join-success 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes join-success {
+          0% { transform: scale(1); }
+          30% { transform: scale(1.1); }
+          60% { transform: scale(0.95); }
+          100% { transform: scale(1); }
+        }
+        
+        .card-hover:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(127, 35, 253, 0.1);
+        }
+        
+        .floating-hearts {
+          position: absolute;
+          pointer-events: none;
+          z-index: 10;
+        }
+        
+        .floating-heart {
+          position: absolute;
+          animation: float-up 1.5s ease-out forwards;
+          font-size: 20px;
+        }
+        
+        @keyframes float-up {
+          0% {
+            opacity: 1;
+            transform: translateY(0) scale(0.8);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-60px) scale(1.2);
+          }
+        }
+      `}</style>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Card con formulario */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Formulario de Ejemplo</CardTitle>
-            <CardDescription>
-              Prueba los componentes de formulario instalados
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="tu@email.com" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="name">Nombre</Label>
-              <Input id="name" type="text" placeholder="Tu nombre" />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full">Enviar</Button>
-          </CardFooter>
-        </Card>
-
-        {/* Card con botones */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Variantes de Botones</CardTitle>
-            <CardDescription>
-              Diferentes estilos de botones disponibles
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button className="w-full" variant="default">
-              Default
+      <div className="min-h-screen bg-zinc-900">
+        {/* Header */}
+        <header className="p-4 flex justify-between items-center sticky top-0 z-10 bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800/50">
+          <div className="flex items-center space-x-2">
+            <span className="material-icons text-2xl text-zinc-100">groups</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="p-2 rounded-full hover:bg-zinc-700/60 transition-all duration-200 text-zinc-300 hover:text-purple-400"
+            >
+              <span className="material-icons">filter_list</span>
             </Button>
-            <Button className="w-full" variant="secondary">
-              Secondary
-            </Button>
-            <Button className="w-full" variant="outline">
-              Outline
-            </Button>
-            <Button className="w-full" variant="ghost">
-              Ghost
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Card con dialog */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Modal Dialog</CardTitle>
-            <CardDescription>
-              Ejemplo de componente dialog (modal)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full">
-                  Abrir Modal
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>¿Estás seguro?</DialogTitle>
-                  <DialogDescription>
-                    Este es un ejemplo de modal usando el componente Dialog de
-                    ShadCN. Funciona perfectamente con React 19 y Tailwind CSS
-                    v4.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex gap-2 justify-end pt-4">
-                  <Button variant="outline">Cancelar</Button>
-                  <Button>Confirmar</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Status del proyecto */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Estado del Proyecto</CardTitle>
-          <CardDescription>
-            Configuración completada exitosamente
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span>Next.js 15.3.3</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span>Tailwind CSS v4</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span>ShadCN/UI</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span>React 19</span>
-            </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <span className="font-mono text-2xl font-bold text-zinc-100 tracking-wider">IWS</span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="p-2 rounded-full hover:bg-zinc-700/60 transition-all duration-200 text-zinc-300 hover:text-purple-400"
+            >
+              <span className="material-icons">search</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="p-2 rounded-full hover:bg-zinc-700/60 transition-all duration-200 text-zinc-300 hover:text-purple-400"
+            >
+              <span className="material-icons">person</span>
+            </Button>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="p-4 space-y-6">
+          {gos.map((go) => {
+            const progressPercentage = (go.currentParticipants / go.maxParticipants) * 100;
+            const isCelebrating = celebratingItems.has(go.id);
+            
+            return (
+              <div
+                key={go.id}
+                className={`bg-zinc-800 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 ease-out card-hover transform ${
+                  isCelebrating ? 'scale-105' : ''
+                }`}
+              >
+                {/* Image Section */}
+                <div className="relative">
+                  <img
+                    alt={go.title}
+                    className="w-full h-60 object-cover"
+                    src={go.image}
+                  />
+                  
+                  {/* Time Badge */}
+                  <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-2.5 py-1.5 rounded-full backdrop-blur-sm shadow-md">
+                    Ends in: {go.endTime}
+                  </div>
+                  
+                  {/* Popular Badge */}
+                  {go.isPopular && (
+                    <div className="popular-badge absolute bottom-3 left-3 bg-red-600 text-white text-[11px] px-2.5 py-1 rounded-md font-semibold tracking-wide shadow-md">
+                      🔥 POPULAR
+                    </div>
+                  )}
+                </div>
+
+                {/* Content Section */}
+                <div className="p-5">
+                  <h2 className="text-lg font-semibold text-zinc-100 mb-3 truncate" title={go.title}>
+                    {go.title}
+                  </h2>
+
+                  {/* Progress Section */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-zinc-300 mb-1.5">
+                      <span>Participants: {go.currentParticipants}/{go.maxParticipants}</span>
+                      <span className="font-medium text-zinc-100">{Math.round(progressPercentage)}%</span>
+                    </div>
+                    <div className="w-full bg-zinc-700 rounded-full h-2.5 overflow-hidden">
+                      <div
+                        className="progress-bar-fill h-2.5 rounded-full"
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Price and Like Section */}
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-zinc-100">
+                      <span className="text-xl font-bold">${go.price.toFixed(2)}</span>
+                      {go.originalPrice && (
+                        <span className="text-sm text-zinc-500 line-through ml-1.5">
+                          ${go.originalPrice.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <button
+                      onClick={() => toggleLike(go.id)}
+                      className={`heart-icon ${go.isLiked ? 'liked' : ''} ${isCelebrating ? 'heart-celebrate' : ''} 
+                        p-2 rounded-full hover:bg-zinc-700/60 transition-all duration-200 ease-out transform 
+                        hover:scale-110 active:scale-125 relative`}
+                      aria-label={go.isLiked ? "Unlike item" : "Like item"}
+                    >
+                      <span className="material-icons text-2xl align-middle">
+                        {go.isLiked ? 'favorite' : 'favorite_border'}
+                      </span>
+                      
+                      {/* Floating hearts effect */}
+                      {isCelebrating && go.isLiked && (
+                        <div className="floating-hearts">
+                          {[...Array(3)].map((_, i) => (
+                            <div
+                              key={i}
+                              className="floating-heart"
+                              style={{
+                                left: `${-10 + i * 10}px`,
+                                animationDelay: `${i * 0.1}s`
+                              }}
+                            >
+                              💜
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Join Button */}
+                  <Button
+                    onClick={() => joinGO(go.id)}
+                    data-join={go.id}
+                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 
+                      text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 ease-out 
+                      transform hover:scale-[1.03] active:scale-95 shadow-lg hover:shadow-purple-600/40 
+                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+                  >
+                    <span className="mr-2">🎉</span>
+                    Join Group Order
+                    <span className="ml-2">✨</span>
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </main>
+      </div>
+    </>
   );
 }
