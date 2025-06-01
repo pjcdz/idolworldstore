@@ -1,0 +1,76 @@
+{
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/out": true,
+    "**/build": true,
+    "**/dist": true,
+    "next-env.d.ts": true,
+    "**/.env.local": true,
+    "**/.env.*.local": true,
+    "eslint.config.mjs": true,
+    "postcss.config.mjs": true,
+    "tailwind.config.js": true,
+    "tsconfig.json": true,
+    "package-lock.json": true,
+    "yarn.lock": true,
+    "pnpm-lock.yaml": true,
+    "public/next.svg": true,
+    "public/vercel.svg": true,
+    "public/file.svg": true,
+    "public/globe.svg": true,
+    "public/window.svg": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/out": true,
+    "**/build": true,
+    "**/dist": true,
+    "package-lock.json": true,
+    "yarn.lock": true,
+    "pnpm-lock.yaml": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/.turbo/**": true,
+    "**/out/**": true,
+    "**/build/**": true,
+    "**/dist/**": true
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "tailwindCSS.includeLanguages": {
+    "typescript": "typescript",
+    "typescriptreact": "typescriptreact"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ]
+}
