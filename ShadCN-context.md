@@ -33,12 +33,12 @@ This file tracks all ShadCN/UI components installed and used in this project.
 
 - **card** (`src/components/ui/card.tsx`) - Card component for content containers (Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent)
 - **navigation-menu** (`src/components/ui/navigation-menu.tsx`) - Advanced navigation menu component for site navigation
-- **dropdown-menu** (`src/components/ui/dropdown-menu.tsx`) - Dropdown menu component for user menus, filters, and actions
+- **dropdown-menu** (`src/components/ui/dropdown-menu.tsx`) - ✅ USED - Dropdown menu component for user menus, filters, and actions. Used in DeliveryIndicator for chronogram details.
 - **tabs** (`src/components/ui/tabs.tsx`) - Tab navigation component for product details, descriptions, and categories
 - **sheet** (`src/components/ui/sheet.tsx`) - Sheet/drawer component for mobile cart, filters sidebar, and overlay panels
 - **drawer** (`src/components/ui/drawer.tsx`) - ✅ NEW - Native mobile drawer for enhanced mobile UX (bottom sheets, slide-up panels)
 - **breadcrumb** (`src/components/ui/breadcrumb.tsx`) - Breadcrumb navigation for hierarchical product categories
-- **separator** (`src/components/ui/separator.tsx`) - Visual separator component for clean content division
+- **separator** (`src/components/ui/separator.tsx`) - ✅ USED - Visual separator component for clean content division. Used in DeliveryIndicator dropdown for section separation.
 
 #### ✅ Data Display
 
@@ -91,7 +91,7 @@ src/
 │       ├── command.tsx         ✅
 │       ├── dialog.tsx          ✅
 │       ├── drawer.tsx          ✅ NEW - Native mobile navigation
-│       ├── dropdown-menu.tsx   ✅
+│       ├── dropdown-menu.tsx   ✅ USED - Used in DeliveryIndicator for chronogram details.
 │       ├── form.tsx            ✅
 │       ├── input.tsx           ✅
 │       ├── label.tsx           ✅
@@ -100,7 +100,7 @@ src/
 │       ├── progress.tsx        ✅
 │       ├── radio-group.tsx     ✅
 │       ├── select.tsx          ✅
-│       ├── separator.tsx       ✅
+│       ├── separator.tsx       ✅ USED - Used in DeliveryIndicator dropdown for section separation.
 │       ├── sheet.tsx           ✅
 │       ├── skeleton.tsx        ✅
 │       ├── slider.tsx          ✅
