@@ -210,9 +210,18 @@ export default function GOs() {
           </div>
 
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <span className="font-mono text-2xl font-bold text-gray-900 tracking-wider">
-              IWS
-            </span>
+            <div className="relative">
+              {/* Logo background glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 blur-sm opacity-30 scale-110"></div>
+              
+              {/* Main logo */}
+              <span className="relative font-mono text-2xl font-bold bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 bg-clip-text text-transparent tracking-wider drop-shadow-sm">
+                I<span className="text-3xl">W</span>S
+              </span>
+              
+              {/* Subtle underline accent */}
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 opacity-60"></div>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
