@@ -103,18 +103,25 @@ export function DeliveryIndicator({ className }: DeliveryIndicatorProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className={`w-full bg-white/80 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-gray-200/50 hover:bg-white transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md ${className}`}
+          className={`w-full bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-2xl p-4 mb-6 border border-gray-200/50 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 cursor-pointer shadow-lg hover:shadow-xl relative overflow-hidden ${className}`}
         >
-          <div className="flex items-center justify-between">
+          {/* Background Pattern - Same as Store Banner */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-24 h-24 bg-white rounded-full -translate-x-12 -translate-y-12"></div>
+            <div className="absolute top-1/4 right-0 w-16 h-16 bg-white rounded-full translate-x-8"></div>
+            <div className="absolute bottom-0 left-1/4 w-12 h-12 bg-white rounded-full translate-y-6"></div>
+          </div>
+
+          <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
                 className={`w-2 h-2 rounded-full ${
                   participationOpen
-                    ? "bg-green-500 animate-pulse"
-                    : "bg-red-500"
+                    ? "bg-green-400 animate-pulse"
+                    : "bg-red-400"
                 }`}
               />
-              <span className="text-gray-700 text-sm font-medium">
+              <span className="text-white text-sm font-medium">
                 {participationOpen
                   ? "Tiempo restante"
                   : "Participación cerrada"}
@@ -122,26 +129,26 @@ export function DeliveryIndicator({ className }: DeliveryIndicatorProps) {
             </div>
 
             {participationOpen && timeRemaining && (
-              <div className="flex items-center gap-1 font-mono text-sm text-gray-900">
+              <div className="flex items-center gap-1 font-mono text-sm text-white">
                 <span className="font-bold">{timeRemaining.days}</span>
-                <span className="text-gray-500">d</span>
+                <span className="text-purple-100">d</span>
                 <span className="font-bold">
                   {timeRemaining.hours.toString().padStart(2, "0")}
                 </span>
-                <span className="text-gray-500">h</span>
+                <span className="text-purple-100">h</span>
                 <span className="font-bold">
                   {timeRemaining.minutes.toString().padStart(2, "0")}
                 </span>
-                <span className="text-gray-500">m</span>
+                <span className="text-purple-100">m</span>
                 <span className="font-bold">
                   {timeRemaining.seconds.toString().padStart(2, "0")}
                 </span>
-                <span className="text-gray-500">s</span>
+                <span className="text-purple-100">s</span>
               </div>
             )}
 
             {/* Indicador de que es clickeable */}
-            <div className="text-gray-400 text-xs ml-2">▼</div>
+            <div className="text-purple-200 text-xs ml-2">▼</div>
           </div>
         </button>
       </DropdownMenuTrigger>
