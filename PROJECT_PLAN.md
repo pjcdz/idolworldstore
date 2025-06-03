@@ -23,7 +23,7 @@
 
 ### Brand Elements
 
-- **Logo Design**: 
+- **Logo Design**:
   - Minimalista y moderno con fuente monoespaciada
   - "IWS" con 'W' prominente y efectos de gradiente
   - Fondo decorativo con glow y línea de acento
@@ -38,7 +38,7 @@
 ### Color System
 
 - **Primary Accent**: `#7f23fd` (Purple)
-- **Gradient Scheme**: 
+- **Gradient Scheme**:
   - Primary: `from-purple-600 to-pink-600`
   - Secondary: `from-purple-600 via-purple-700 to-pink-600`
   - Emphasis: `from-white to-purple-100`
@@ -50,18 +50,21 @@
 ### UI Components
 
 #### Headers & Banners
+
 - Fondos con gradientes dinámicos
 - Patrones decorativos con círculos
 - Efectos de glassmorphism
 - Elementos interactivos con hover states
 
 #### Botones & Controles
+
 - Estilo floating para elementos principales
 - Gradientes consistentes en estados activos
 - Shadows adaptativas según estado
 - Animaciones de feedback
 
 #### Estados & Badges
+
 - Sistema de colores semánticos (success, warning, error)
 - Badges con animaciones contextuales
 - Indicadores de stock dinámicos

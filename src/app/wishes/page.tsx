@@ -4,100 +4,109 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-interface Product {
+interface Wish {
   id: string;
   title: string;
-  brand: string;
+  requester: string;
   image: string;
-  price: number;
-  originalPrice?: number;
-  stock: number;
+  likes: number;
   category: string;
-  isPopular?: boolean;
-  isNew?: boolean;
+  createdAt: string;
   isLiked: boolean;
-  isFreeShipping?: boolean;
+  estimatedPrice?: number;
+  description?: string;
+  isHot?: boolean;
+  isRecent?: boolean;
 }
 
-const mockProducts: Product[] = [
+const mockWishes: Wish[] = [
   {
     id: "1",
-    title: "NewJeans 'Get Up' Album Digipack",
-    brand: "ADOR",
+    title: "SEVENTEEN 'God of Music' Lightstick Ver. 3",
+    requester: "CaratForever",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDaH4ZrWBEGk0q1kOKq5u1vWmeDZwZSK2sZc-y1b0Ckg9uWK0TlTRw_i_ubvewF9cOdrlUd2yyEMAoz4bB8yVTTKIdLCVgK1lCIDj_JSa3I4Kuf_6oEyiPs0D4j8OfEFCl99kniXbRovUsONYR_6YEkNJ77H7gxBKlwEvQxBzGSl7_6VDsJajKFybsTo4iojpOLaz6imhKL_mIxQErYsuUswibG4H1_1z5H8OQS_qupspugTD2X5TmXRxU0hqdOHZ3AijthjOj0Da-Q",
-    price: 22.99,
-    originalPrice: 28.99,
-    stock: 15,
-    category: "Albums",
-    isNew: true,
-    isLiked: false,
-    isFreeShipping: true,
+    likes: 156,
+    category: "Lightsticks",
+    createdAt: "Hace 2h",
+    isLiked: true,
+    estimatedPrice: 65.0,
+    description: "¡Por favor necesitamos el nuevo lightstick de SVT! 🔥",
+    isHot: true,
   },
   {
     id: "2",
-    title: "BLACKPINK Lisa Photocard Set",
-    brand: "YG Entertainment",
+    title: "IVE 'I AM' Album Photobook Edición Limitada",
+    requester: "DiveCollector",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuApYkfr6XU6UlpRZ_FaZCL0IYgtCDEbbwz73-0G7lKKdw-XC_JDd7ktC3R64bKIyvt1DpTnj0ehqhYlN4TGBcmjU5yB6WzqdNgWi_r9blz95BDfG4t3Xvoe8gqEBbhBs8yJUv9w9_bQg1xKJ6ReIIyRYn3fGxpXTmZrgTpjrysWN37wAUenDh8aIV4aVnNArW1k-vNNLoFEad9AxLHHxXkadRvUtkhEbgy8fHj3_YVWzs-6Jby8htGHtBP7FPdkvqX_IS3Svkxa4Rc7",
-    price: 18.5,
-    stock: 3,
-    category: "Photocards",
-    isPopular: true,
-    isLiked: true,
+    likes: 89,
+    category: "Albums",
+    createdAt: "Hace 5h",
+    isLiked: false,
+    estimatedPrice: 45.0,
+    description: "Album con fotos exclusivas que no encontramos en ningún lado 💕",
   },
   {
     id: "3",
-    title: "aespa 'My World' Lightstick Oficial",
-    brand: "SM Entertainment",
+    title: "(G)I-DLE Minnie Photocard Set Oficial",
+    requester: "NeverbandFan",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAmn11B0bR6PHc_O--Sbi-mVUepsCN0UTz2hpvFAeGKDTnwRWM2jaKDl4CNr7dVy5WQ0vNjxx56BwP3L2ox_X3dU1gkvLPe2Zz9k9JU3GgZkSHIauf1gVmPk9zVS1pfs6ztZv0eBkyOBhuD-X5i5ysu1wk1EMmhShrtDn79t2pahkFejqv8dTK9-b5h5dG5bWt7DGUEM_TF_U9fU3tOmlYmd99iZarzGyJvl81YEtoX1m6BJosTM5kVR_ZxebvyFX9X2id1odPL1_n6",
-    price: 45.0,
-    originalPrice: 52.0,
-    stock: 8,
-    category: "Lightsticks",
-    isPopular: true,
-    isLiked: false,
-    isFreeShipping: true,
+    likes: 234,
+    category: "Photocards",
+    createdAt: "Hace 1d",
+    isLiked: true,
+    estimatedPrice: 28.0,
+    description: "Las photocards de Minnie son imposibles de conseguir 😭",
+    isHot: true,
   },
   {
     id: "4",
-    title: "TWICE 'Formula of Love' Poster Set",
-    brand: "JYP Entertainment",
+    title: "NewJeans Bunny Hat Oficial Merchandise",
+    requester: "BunnyLover",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuApYkfr6XU6UlpRZ_FaZCL0IYgtCDEbbwz73-0G7lKKdw-XC_JDd7ktC3R64bKIyvt1DpTnj0ehqhYlN4TGBcmjU5yB6WzqdNgWi_r9blz95BDfG4t3Xvoe8gqEBbhBs8yJUv9w9_bQg1xKJ6ReIIyRYn3fGxpXTmZrgTpjrysWN37wAUenDh8aIV4aVnNArW1k-vNNLoFEad9AxLHHxXkadRvUtkhEbgy8fHj3_YVWzs-6Jby8htGHtBP7FPdkvqX_IS3Svkxa4Rc7",
-    price: 12.99,
-    stock: 25,
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDaH4ZrWBEGk0q1kOKq5u1vWmeDZwZSK2sZc-y1b0Ckg9uWK0TlTRw_i_ubvewF9cOdrlUd2yyEMAoz4bB8yVTTKIdLCVgK1lCIDj_JSa3I4Kuf_6oEyiPs0D4j8OfEFCl99kniXbRovUsONYR_6YEkNJ77H7gxBKlwEvQxBzGSl7_6VDsJajKFybsTo4iojpOLaz6imhKL_mIxQErYsuUswibG4H1_1z5H8OQS_qupspugTD2X5TmXRxU0hqdOHZ3AijthjOj0Da-Q",
+    likes: 67,
     category: "Merchandise",
+    createdAt: "Hace 3h",
     isLiked: false,
+    estimatedPrice: 35.0,
+    description: "El gorro de conejito más tierno que he visto ✨",
+    isRecent: true,
   },
   {
     id: "5",
-    title: "BTS 'Map of the Soul: 7' Vinyl Edición Limitada",
-    brand: "HYBE Corporation",
+    title: "TWICE Nayeon Solo Album 'IM NAYEON' Vinyl",
+    requester: "OnceVinyl",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDaH4ZrWBEGk0q1kOKq5u1vWmeDZwZSK2sZc-y1b0Ckg9uWK0TlTRw_i_ubvewF9cOdrlUd2yyEMAoz4bB8yVTTKIdLCVgK1lCIDj_JSa3I4Kuf_6oEyiPs0D4j8OfEFCl99kniXbRovUsONYR_6YEkNJ77H7gxBKlwEvQxBzGSl7_6VDsJajKFybsTo4iojpOLaz6imhKL_mIxQErYsuUswibG4H1_1z5H8OQS_qupspugTD2X5TmXRxU0hqdOHZ3AijthjOj0Da-Q",
-    price: 89.99,
-    originalPrice: 99.99,
-    stock: 2,
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuApYkfr6XU6UlpRZ_FaZCL0IYgtCDEbbwz73-0G7lKKdw-XC_JDd7ktC3R64bKIyvt1DpTnj0ehqhYlN4TGBcmjU5yB6WzqdNgWi_r9blz95BDfG4t3Xvoe8gqEBbhBs8yJUv9w9_bQg1xKJ6ReIIyRYn3fGxpXTmZrgTpjrysWN37wAUenDh8aIV4aVnNArW1k-vNNLoFEad9AxLHHxXkadRvUtkhEbgy8fHj3_YVWzs-6Jby8htGHtBP7FPdkvqX_IS3Svkxa4Rc7",
+    likes: 143,
     category: "Vinyl",
-    isPopular: true,
+    createdAt: "Hace 6h",
     isLiked: false,
-    isFreeShipping: true,
+    estimatedPrice: 75.0,
+    description: "¡Necesito este vinyl en mi colección! 🎵",
   },
 ];
 
-export default function Store() {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+export default function Wishes() {
+  const [wishes, setWishes] = useState<Wish[]>(
+    mockWishes.sort((a, b) => b.likes - a.likes)
+  );
   const [celebratingItems, setCelebratingItems] = useState<Set<string>>(
     new Set()
   );
 
   const toggleLike = (id: string) => {
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === id ? { ...product, isLiked: !product.isLiked } : product
-      )
+    setWishes((prev) =>
+      prev.map((wish) => {
+        if (wish.id === id) {
+          const newLikes = wish.isLiked ? wish.likes - 1 : wish.likes + 1;
+          return { ...wish, isLiked: !wish.isLiked, likes: newLikes };
+        }
+        return wish;
+      })
     );
 
     // Add celebration effect
@@ -109,25 +118,18 @@ export default function Store() {
         return newSet;
       });
     }, 600);
+
+    // Re-sort by likes after a brief delay
+    setTimeout(() => {
+      setWishes((prev) => [...prev].sort((a, b) => b.likes - a.likes));
+    }, 100);
   };
 
-  const buyProduct = (id: string) => {
-    // Add celebration and feedback
-    const button = document.querySelector(`[data-buy="${id}"]`);
-    button?.classList.add("buy-celebrate");
-    setTimeout(() => button?.classList.remove("buy-celebrate"), 800);
-  };
-
-  const getStockColor = (stock: number) => {
-    if (stock <= 3) return "text-red-600";
-    if (stock <= 10) return "text-orange-600";
-    return "text-green-600";
-  };
-
-  const getStockText = (stock: number) => {
-    if (stock <= 3) return `¡Solo quedan ${stock}!`;
-    if (stock <= 10) return `${stock} disponibles`;
-    return `${stock} en stock`;
+  const createWish = () => {
+    // Add celebration and feedback for the button
+    const button = document.querySelector(`[data-create-wish]`);
+    button?.classList.add("create-celebrate");
+    setTimeout(() => button?.classList.remove("create-celebrate"), 800);
   };
 
   return (
@@ -163,24 +165,26 @@ export default function Store() {
           }
         }
 
-        .popular-badge {
-          animation: pulse-badge 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        .hot-badge {
+          animation: pulse-hot 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
         }
 
-        @keyframes pulse-badge {
+        @keyframes pulse-hot {
           0%,
           100% {
             transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
           }
           70% {
             transform: scale(1.05);
-            box-shadow: 0 0 0 7px rgba(220, 38, 38, 0);
+            box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
           }
         }
 
-        .new-badge {
+        .recent-badge {
           animation: shimmer 2s infinite;
+          background: linear-gradient(90deg, #10b981, #34d399, #10b981);
+          background-size: 200% 100%;
         }
 
         @keyframes shimmer {
@@ -193,11 +197,11 @@ export default function Store() {
           }
         }
 
-        .buy-celebrate {
-          animation: buy-success 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        .create-celebrate {
+          animation: create-success 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        @keyframes buy-success {
+        @keyframes create-success {
           0% {
             transform: scale(1);
           }
@@ -241,17 +245,36 @@ export default function Store() {
           }
         }
 
-        .stock-indicator {
-          animation: pulse-stock 2s infinite;
+        .likes-counter {
+          animation: pulse-likes 2s infinite;
         }
 
-        @keyframes pulse-stock {
+        @keyframes pulse-likes {
           0%,
           100% {
             opacity: 1;
           }
           50% {
-            opacity: 0.7;
+            opacity: 0.8;
+          }
+        }
+
+        .gradient-text {
+          background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
+          background-size: 200% 200%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
           }
         }
       `}</style>
@@ -261,7 +284,7 @@ export default function Store() {
         <header className="p-4 flex justify-between items-center sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
           <div className="flex items-center space-x-2">
             <span className="material-icons text-2xl text-gray-800">
-              storefront
+              card_giftcard
             </span>
             <Button
               variant="ghost"
@@ -305,96 +328,93 @@ export default function Store() {
           </div>
         </header>
 
-        {/* Cart Button - Floating */}
-        <Button
-          variant="default"
-          size="icon"
-          className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 
-            hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-purple-600/40 transition-all duration-300 
-            transform hover:scale-110 active:scale-95 z-40"
-        >
-          <span className="material-icons text-2xl">shopping_cart</span>
-          <Badge
-            className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600 text-white text-xs 
-              flex items-center justify-center transform scale-100 transition-transform 
-              duration-200 hover:scale-110"
-          >
-            3
-          </Badge>
-        </Button>
-
         {/* Main Content */}
         <main className="p-4 space-y-6 relative z-0">
-          {/* Store Info Banner - Enhanced & Mobile Optimized */}
+          {/* Wishes Header Banner */}
           <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl p-6 text-white overflow-hidden">
-            {/* Background Pattern - Optimized */}
+            {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 left-0 w-24 h-24 bg-white rounded-full -translate-x-12 -translate-y-12"></div>
               <div className="absolute top-1/4 right-0 w-16 h-16 bg-white rounded-full translate-x-8"></div>
               <div className="absolute bottom-0 left-1/4 w-12 h-12 bg-white rounded-full translate-y-6"></div>
+              <div className="absolute top-1/2 left-1/2 w-8 h-8 bg-white rounded-full -translate-x-4 -translate-y-4"></div>
             </div>
 
-            {/* Content - Reorganized for Mobile */}
+            {/* Content */}
             <div className="relative z-10">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-4">
                 {/* Left Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-3 mb-2">
                     <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                      <span className="text-xl">🛍️</span>
+                      <span className="text-xl">✨</span>
                     </div>
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent truncate">
-                      STORE K-POP
+                    <h1 className="text-2xl font-bold text-white truncate">
+                      WISHes
                     </h1>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
                     <span className="text-purple-100 text-xs font-medium">
-                      Disponible 24/7
+                      Deseos de la comunidad
                     </span>
                   </div>
                 </div>
 
-                {/* Right Counter - Center Aligned */}
+                {/* Right Counter */}
                 <div className="relative shrink-0 self-center">
                   <div className="absolute inset-0 bg-white/20 rounded-xl blur-lg"></div>
                   <div className="relative bg-white/10 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20">
                     <div className="text-2xl font-bold bg-gradient-to-b from-white to-purple-100 bg-clip-text text-transparent text-center">
-                      {products.length}
+                      {wishes.reduce((sum, wish) => sum + wish.likes, 0)}
                     </div>
                     <div className="text-purple-100 text-xs text-center">
-                      productos
+                      likes totales
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Quick Stats - Justified */}
+              {/* Create Wish Button */}
+              <Button
+                onClick={createWish}
+                data-create-wish
+                className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 
+                  text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 ease-out 
+                  transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-white/20
+                  focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                <span className="mr-3 text-xl">🌟</span>
+                <span className="text-lg">¿Qué artículo deseas?</span>
+                <span className="ml-3 text-xl">💫</span>
+              </Button>
+
+              {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
                 <div className="flex items-center justify-center gap-1.5">
-                  <span className="text-base">🚀</span>
-                  <span className="text-purple-100 text-xs">Envío rápido</span>
+                  <span className="text-base">🔥</span>
+                  <span className="text-purple-100 text-xs">Tendencias</span>
                 </div>
                 <div className="flex items-center justify-center gap-1.5">
-                  <span className="text-base">💝</span>
-                  <span className="text-purple-100 text-xs">Oficial</span>
+                  <span className="text-base">💖</span>
+                  <span className="text-purple-100 text-xs">Comunidad</span>
                 </div>
                 <div className="flex items-center justify-center gap-1.5">
-                  <span className="text-base">🔒</span>
-                  <span className="text-purple-100 text-xs">Seguro</span>
+                  <span className="text-base">🎯</span>
+                  <span className="text-purple-100 text-xs">Demanda</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Products Grid */}
-          {products.map((product) => {
-            const isCelebrating = celebratingItems.has(product.id);
+          {/* Wishes List */}
+          {wishes.map((wish) => {
+            const isCelebrating = celebratingItems.has(wish.id);
 
             return (
               <div
-                key={product.id}
+                key={wish.id}
                 className={`bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-out card-hover transform border border-gray-200/50 ${
                   isCelebrating ? "scale-105" : ""
                 }`}
@@ -402,33 +422,36 @@ export default function Store() {
                 {/* Image Section */}
                 <div className="relative">
                   <img
-                    alt={product.title}
+                    alt={wish.title}
                     className="w-full h-60 object-cover"
-                    src={product.image}
+                    src={wish.image}
                   />
 
                   {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-col gap-2">
-                    {product.isPopular && (
-                      <div className="popular-badge bg-red-600 text-white text-[11px] px-2.5 py-1 rounded-md font-semibold tracking-wide shadow-md">
+                    {wish.isHot && (
+                      <div className="hot-badge bg-red-600 text-white text-[11px] px-2.5 py-1 rounded-md font-semibold tracking-wide shadow-md">
                         🔥 POPULAR
                       </div>
                     )}
-                    {product.isNew && (
-                      <div className="new-badge bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[11px] px-2.5 py-1 rounded-md font-semibold tracking-wide shadow-md">
-                        ✨ NUEVO
+                    {wish.isRecent && (
+                      <div className="recent-badge text-white text-[11px] px-2.5 py-1 rounded-md font-semibold tracking-wide shadow-md">
+                        ✨ RECIENTE
                       </div>
                     )}
                   </div>
 
-                  {/* Free Shipping Badge */}
-                  {product.isFreeShipping && (
-                    <div className="absolute top-3 right-3">
-                      <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-[10px]">
-                        📦 ENVÍO GRATIS
-                      </Badge>
+                  {/* Likes Counter - Top Right */}
+                  <div className="absolute top-3 right-3">
+                    <div className="bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                      <span className="material-icons text-pink-400 text-sm">
+                        favorite
+                      </span>
+                      <span className="text-white text-sm font-semibold likes-counter">
+                        {wish.likes}
+                      </span>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* Content Section */}
@@ -438,62 +461,59 @@ export default function Store() {
                       variant="outline"
                       className="text-xs text-gray-600 mb-2"
                     >
-                      {product.category}
+                      {wish.category}
                     </Badge>
                   </div>
 
                   <h2
                     className="text-lg font-semibold text-gray-900 mb-2 truncate"
-                    title={product.title}
+                    title={wish.title}
                   >
-                    {product.title}
+                    {wish.title}
                   </h2>
 
-                  <p className="text-sm text-gray-600 mb-3">{product.brand}</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Pedido por <span className="font-medium">{wish.requester}</span>
+                  </p>
 
-                  {/* Stock Indicator */}
-                  <div className="mb-4">
-                    <div
-                      className={`text-xs font-medium ${getStockColor(
-                        product.stock
-                      )} ${product.stock <= 3 ? "stock-indicator" : ""}`}
-                    >
-                      {getStockText(product.stock)}
-                    </div>
-                  </div>
+                  {wish.description && (
+                    <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+                      {wish.description}
+                    </p>
+                  )}
 
-                  {/* Price and Like Section */}
+                  {/* Price and Time Section */}
                   <div className="flex justify-between items-center mb-4">
                     <div className="text-gray-900">
-                      <span className="text-xl font-bold">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      {product.originalPrice && (
-                        <span className="text-sm text-gray-500 line-through ml-1.5">
-                          ${product.originalPrice.toFixed(2)}
+                      {wish.estimatedPrice && (
+                        <span className="text-lg font-bold text-purple-600">
+                          ~${wish.estimatedPrice.toFixed(2)}
                         </span>
                       )}
+                      <div className="text-xs text-gray-500 mt-1">
+                        {wish.createdAt}
+                      </div>
                     </div>
 
                     <button
-                      onClick={() => toggleLike(product.id)}
-                      className={`heart-icon ${
-                        product.isLiked ? "liked" : ""
-                      } ${isCelebrating ? "heart-celebrate" : ""} 
+                      onClick={() => toggleLike(wish.id)}
+                      className={`heart-icon ${wish.isLiked ? "liked" : ""} ${
+                        isCelebrating ? "heart-celebrate" : ""
+                      } 
                         p-2 rounded-full hover:bg-gray-100 transition-all duration-200 ease-out transform 
                         hover:scale-110 active:scale-125 relative`}
                       aria-label={
-                        product.isLiked
-                          ? "Quitar de favoritos"
-                          : "Agregar a favoritos"
+                        wish.isLiked
+                          ? "Quitar like"
+                          : "Dar like a este deseo"
                       }
                     >
                       <span className="material-icons text-2xl align-middle">
-                        {product.isLiked ? "favorite" : "favorite_border"}
+                        {wish.isLiked ? "favorite" : "favorite_border"}
                       </span>
 
                       {/* Floating hearts effect */}
-                      {isCelebrating && product.isLiked && (
+                      {isCelebrating && wish.isLiked && (
                         <div className="floating-hearts">
                           {[...Array(3)].map((_, i) => (
                             <div
@@ -512,31 +532,29 @@ export default function Store() {
                     </button>
                   </div>
 
-                  {/* Buy Button */}
+                  {/* Support Button */}
                   <Button
-                    onClick={() => buyProduct(product.id)}
-                    data-buy={product.id}
-                    disabled={product.stock === 0}
+                    onClick={() => toggleLike(wish.id)}
                     className={`w-full ${
-                      product.stock === 0
-                        ? "bg-gray-400 cursor-not-allowed"
+                      wish.isLiked
+                        ? "bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"
                         : "bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
                     } 
                       text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 ease-out 
                       transform hover:scale-[1.03] active:scale-95 shadow-lg hover:shadow-purple-600/40 
                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50`}
                   >
-                    {product.stock === 0 ? (
+                    {wish.isLiked ? (
                       <>
-                        <span className="mr-2">😔</span>
-                        Agotado
-                        <span className="ml-2">📭</span>
+                        <span className="mr-2">💖</span>
+                        ¡Ya apoyas este deseo!
+                        <span className="ml-2">✨</span>
                       </>
                     ) : (
                       <>
-                        <span className="mr-2">🛒</span>
-                        Comprar Ahora
-                        <span className="ml-2">💳</span>
+                        <span className="mr-2">🙌</span>
+                        Apoyar este deseo
+                        <span className="ml-2">🌟</span>
                       </>
                     )}
                   </Button>
@@ -544,6 +562,20 @@ export default function Store() {
               </div>
             );
           })}
+
+          {/* Community Info Footer */}
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200/50">
+            <div className="text-center">
+              <div className="text-2xl mb-2">🌟</div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                ¡Más deseos, más posibilidades!
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Los deseos con más likes tienen más posibilidades de convertirse en Group Orders. 
+                ¡Apoya los deseos que más te gusten! 💜
+              </p>
+            </div>
+          </div>
         </main>
       </div>
     </>
