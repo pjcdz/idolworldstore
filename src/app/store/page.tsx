@@ -311,18 +311,65 @@ export default function Store() {
 
         {/* Main Content */}
         <main className="p-4 space-y-6">
-          {/* Store Info Banner */}
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold mb-2">🛍️ STORE K-POP</h1>
-                <p className="text-purple-100 text-sm">
-                  Productos disponibles para compra inmediata
-                </p>
+          {/* Store Info Banner - Enhanced & Mobile Optimized */}
+          <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl p-6 text-white overflow-hidden">
+            {/* Background Pattern - Optimized */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 left-0 w-24 h-24 bg-white rounded-full -translate-x-12 -translate-y-12"></div>
+              <div className="absolute top-1/4 right-0 w-16 h-16 bg-white rounded-full translate-x-8"></div>
+              <div className="absolute bottom-0 left-1/4 w-12 h-12 bg-white rounded-full translate-y-6"></div>
+            </div>
+            
+            {/* Content - Reorganized for Mobile */}
+            <div className="relative z-10">
+              <div className="flex items-center gap-4">
+                {/* Left Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <span className="text-xl">🛍️</span>
+                    </div>
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent truncate">
+                      STORE K-POP
+                    </h1>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-purple-100 text-xs font-medium">
+                      Disponible 24/7
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Counter - Center Aligned */}
+                <div className="relative shrink-0 self-center">
+                  <div className="absolute inset-0 bg-white/20 rounded-xl blur-lg"></div>
+                  <div className="relative bg-white/10 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20">
+                    <div className="text-2xl font-bold bg-gradient-to-b from-white to-purple-100 bg-clip-text text-transparent text-center">
+                      {products.length}
+                    </div>
+                    <div className="text-purple-100 text-xs text-center">
+                      productos
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold">{products.length}</div>
-                <div className="text-purple-100 text-sm">productos</div>
+              
+              {/* Quick Stats - Justified */}
+              <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="text-base">🚀</span>
+                  <span className="text-purple-100 text-xs">Envío rápido</span>
+                </div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="text-base">💝</span>
+                  <span className="text-purple-100 text-xs">Oficial</span>
+                </div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="text-base">🔒</span>
+                  <span className="text-purple-100 text-xs">Seguro</span>
+                </div>
               </div>
             </div>
           </div>
