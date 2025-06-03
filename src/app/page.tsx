@@ -95,6 +95,8 @@ export default function GOs() {
         .heart-icon {
           color: #a1a1aa;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: visible;
         }
 
         .heart-icon.liked {
@@ -106,19 +108,70 @@ export default function GOs() {
           transform: scale(1.3);
         }
 
+        /* TikTok/Instagram style heart animation */
         .heart-celebrate {
-          animation: heart-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          animation: heart-explosion 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        @keyframes heart-bounce {
+        @keyframes heart-explosion {
           0% {
             transform: scale(1);
           }
-          50% {
-            transform: scale(1.4) rotate(15deg);
+          15% {
+            transform: scale(1.6) rotate(-5deg);
+          }
+          30% {
+            transform: scale(1.3) rotate(3deg);
+          }
+          45% {
+            transform: scale(1.5) rotate(-2deg);
+          }
+          60% {
+            transform: scale(1.2) rotate(1deg);
+          }
+          75% {
+            transform: scale(1.35) rotate(-1deg);
           }
           100% {
             transform: scale(1);
+          }
+        }
+
+        /* Ripple effect like Instagram */
+        .heart-icon::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          background: radial-gradient(circle, rgba(127, 35, 253, 0.3) 0%, transparent 70%);
+          border-radius: 50%;
+          transform: translate(-50%, -50%);
+          opacity: 0;
+          pointer-events: none;
+          z-index: -1;
+        }
+
+        .heart-celebrate::before {
+          animation: ripple-effect 0.8s ease-out;
+        }
+
+        @keyframes ripple-effect {
+          0% {
+            width: 0;
+            height: 0;
+            opacity: 0.8;
+          }
+          50% {
+            width: 80px;
+            height: 80px;
+            opacity: 0.4;
+          }
+          100% {
+            width: 120px;
+            height: 120px;
+            opacity: 0;
           }
         }
 
@@ -169,26 +222,135 @@ export default function GOs() {
             0 0 20px rgba(127, 35, 253, 0.1);
         }
 
+        /* Enhanced floating hearts with different sizes and colors */
         .floating-hearts {
           position: absolute;
           pointer-events: none;
           z-index: 10;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
         }
 
         .floating-heart {
           position: absolute;
-          animation: float-up 1.5s ease-out forwards;
-          font-size: 20px;
+          animation: float-up-enhanced 2s ease-out forwards;
+          font-size: 16px;
+          font-weight: bold;
         }
 
-        @keyframes float-up {
+        .floating-heart:nth-child(1) { 
+          font-size: 20px; 
+          animation-duration: 1.8s;
+        }
+        .floating-heart:nth-child(2) { 
+          font-size: 24px; 
+          animation-duration: 2.2s;
+        }
+        .floating-heart:nth-child(3) { 
+          font-size: 18px; 
+          animation-duration: 2s;
+        }
+        .floating-heart:nth-child(4) { 
+          font-size: 22px; 
+          animation-duration: 1.9s;
+        }
+        .floating-heart:nth-child(5) { 
+          font-size: 16px; 
+          animation-duration: 2.1s;
+        }
+
+        @keyframes float-up-enhanced {
           0% {
             opacity: 1;
-            transform: translateY(0) scale(0.8);
+            transform: translateY(0) scale(0.5) rotate(0deg);
+          }
+          15% {
+            opacity: 1;
+            transform: translateY(-20px) scale(1.2) rotate(15deg);
+          }
+          30% {
+            opacity: 0.9;
+            transform: translateY(-40px) scale(1) rotate(-10deg);
+          }
+          50% {
+            opacity: 0.7;
+            transform: translateY(-70px) scale(1.1) rotate(20deg);
+          }
+          70% {
+            opacity: 0.4;
+            transform: translateY(-100px) scale(0.9) rotate(-15deg);
           }
           100% {
             opacity: 0;
-            transform: translateY(-60px) scale(1.2);
+            transform: translateY(-140px) scale(0.3) rotate(25deg);
+          }
+        }
+
+        /* Sparkle effect */
+        .sparkle {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: #7f23fd;
+          border-radius: 50%;
+          animation: sparkle-float 1.5s ease-out forwards;
+          pointer-events: none;
+        }
+
+        @keyframes sparkle-float {
+          0% {
+            opacity: 1;
+            transform: translateY(0) scale(0);
+          }
+          20% {
+            opacity: 1;
+            transform: translateY(-10px) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-60px) scale(0);
+          }
+        }
+
+        /* Pulse rings effect */
+        .pulse-rings {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 40px;
+          height: 40px;
+          pointer-events: none;
+          z-index: -1;
+        }
+
+        .pulse-ring {
+          position: absolute;
+          border: 2px solid rgba(127, 35, 253, 0.4);
+          border-radius: 50%;
+          animation: pulse-ring 1.5s ease-out forwards;
+        }
+
+        .pulse-ring:nth-child(1) { animation-delay: 0s; }
+        .pulse-ring:nth-child(2) { animation-delay: 0.3s; }
+        .pulse-ring:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes pulse-ring {
+          0% {
+            width: 0;
+            height: 0;
+            opacity: 1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+          100% {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
           }
         }
       `}</style>
@@ -293,8 +455,11 @@ export default function GOs() {
               {/* Description */}
               <div className="mb-4">
                 <p className="text-purple-100 text-sm leading-relaxed">
-                  Únete a fans como tú para hacer pedidos grupales. 
-                  <span className="text-white font-medium"> ¡Juntos compramos más barato!</span>
+                  Únete a fans como tú para hacer pedidos grupales.
+                  <span className="text-white font-medium">
+                    {" "}
+                    ¡Juntos compramos más barato!
+                  </span>
                 </p>
               </div>
 
@@ -408,7 +573,7 @@ export default function GOs() {
                       {/* Floating hearts effect */}
                       {isCelebrating && go.isLiked && (
                         <div className="floating-hearts">
-                          {[...Array(3)].map((_, i) => (
+                          {[...Array(5)].map((_, i) => (
                             <div
                               key={i}
                               className="floating-heart"
