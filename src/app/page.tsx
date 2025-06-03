@@ -195,7 +195,7 @@ export default function GOs() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="p-4 flex justify-between items-center sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+        <header className="p-4 flex justify-between items-center sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
           <div className="flex items-center space-x-2">
             <span className="material-icons text-2xl text-gray-800">
               groups
@@ -243,7 +243,7 @@ export default function GOs() {
         </header>
 
         {/* Main Content */}
-        <main className="p-4 space-y-6">
+        <main className="p-4 space-y-6 relative z-0">
           {/* Delivery Indicator - NEW */}
           <DeliveryIndicator />
 

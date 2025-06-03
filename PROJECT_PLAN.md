@@ -21,23 +21,58 @@
 
 ## 🎨 Visual Identity
 
+### Brand Elements
+
+- **Logo Design**: 
+  - Minimalista y moderno con fuente monoespaciada
+  - "IWS" con 'W' prominente y efectos de gradiente
+  - Fondo decorativo con glow y línea de acento
+  - Mantiene coherencia con la identidad visual global
+
 ### Brand Personality
 
 - **Friendly & Approachable**: Welcoming to all K-pop fans
 - **Girlish Aesthetic**: Soft, cute, and appealing design language
 - **Community-Focused**: Emphasizes social interaction and shared experiences
 
-### Color Palette
+### Color System
 
 - **Primary Accent**: `#7f23fd` (Purple)
-- **Supporting Colors**: Soft pastels, whites, and gentle gradients
-- **UI Elements**: Consistent purple theming throughout all sections
+- **Gradient Scheme**: 
+  - Primary: `from-purple-600 to-pink-600`
+  - Secondary: `from-purple-600 via-purple-700 to-pink-600`
+  - Emphasis: `from-white to-purple-100`
+- **Supporting Elements**:
+  - Glass Effects: `backdrop-blur-md` con opacidades variables
+  - Decorative Patterns: Círculos translúcidos superpuestos
+  - Shadow System: Múltiples capas para profundidad visual
+
+### UI Components
+
+#### Headers & Banners
+- Fondos con gradientes dinámicos
+- Patrones decorativos con círculos
+- Efectos de glassmorphism
+- Elementos interactivos con hover states
+
+#### Botones & Controles
+- Estilo floating para elementos principales
+- Gradientes consistentes en estados activos
+- Shadows adaptativas según estado
+- Animaciones de feedback
+
+#### Estados & Badges
+- Sistema de colores semánticos (success, warning, error)
+- Badges con animaciones contextuales
+- Indicadores de stock dinámicos
+- Efectos de pulso para urgencia
 
 ### Design Consistency
 
-- Shared UI/UX patterns across all three main sections
-- Cohesive art style that feels like one unified app
-- Consistent interaction patterns (swipe, tap, heart/like)
+- Sistema de diseño unificado en todas las secciones
+- Patrones de interacción coherentes
+- Sistema de espaciado y layout consistente
+- Jerarquía visual clara y establecida
 
 ## 🏗️ App Structure
 
@@ -353,35 +388,38 @@ A Group Order (GO) is when multiple fans collaborate on a bulk purchase of K-pop
 
 ## 🚀 Development Phases
 
-### Phase 1: Core Structure
+### Phase 1: Core Structure ✅
 
-- [ ] Bottom navigation implementation
-- [ ] Basic routing between sections
-- [ ] Purple theme integration
-- [ ] Mobile-responsive layouts
+- [x] Bottom navigation implementation
+- [x] Basic routing between sections
+- [x] Purple theme integration
+- [x] Mobile-responsive layouts
 
-### Phase 2: GOs Section
+### Phase 2: GOs Section 🟡
 
-- [ ] GO catalog with infinite scroll
-- [ ] Participation system (heart buttons)
-- [ ] Sorting by popularity
-- [ ] Kickstarter-style progress indicators
+- [x] GO catalog implementation
+- [x] Participation system (heart buttons)
+- [x] Progress indicators & delivery system
+- [ ] Infinite scroll
+- [ ] Advanced sorting
 
-### Phase 3: STORE Section
+### Phase 3: STORE Section 🟡
 
-- [ ] Product catalog
-- [ ] Inventory display
-- [ ] Purchase flow
-- [ ] Integration with other sections
+- [x] Product catalog
+- [x] Inventory display
+- [x] Cart button integration
+- [ ] Cart functionality
+- [ ] Checkout flow
+- [ ] Advanced filtering
 
-### Phase 4: WISHes Section
+### Phase 4: WISHes Section ⏳
 
 - [ ] Wish creation flow
 - [ ] Community wishlist catalog
 - [ ] Like system implementation
 - [ ] Popularity-based sorting
 
-### Phase 5: Enhancement
+### Phase 5: Enhancement ⏳
 
 - [ ] Real-time updates
 - [ ] Advanced filtering

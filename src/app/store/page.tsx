@@ -253,7 +253,7 @@ export default function Store() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="p-4 flex justify-between items-center sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+        <header className="p-4 flex justify-between items-center sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
           <div className="flex items-center space-x-2">
             <span className="material-icons text-2xl text-gray-800">
               storefront
@@ -306,7 +306,7 @@ export default function Store() {
           size="icon"
           className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 
             hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-purple-600/40 transition-all duration-300 
-            transform hover:scale-110 active:scale-95 z-50"
+            transform hover:scale-110 active:scale-95 z-40"
         >
           <span className="material-icons text-2xl">shopping_cart</span>
           <Badge 
@@ -319,7 +319,7 @@ export default function Store() {
         </Button>
 
         {/* Main Content */}
-        <main className="p-4 space-y-6">
+        <main className="p-4 space-y-6 relative z-0">
           {/* Store Info Banner - Enhanced & Mobile Optimized */}
           <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl p-6 text-white overflow-hidden">
             {/* Background Pattern - Optimized */}
