@@ -15,9 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IdolWorldStore - K-pop Group Orders & Merch",
-  description: "Join group orders for your favorite K-pop merchandise and make your wishes come true",
-  viewport: "width=device-width, initial-scale=1.0",
+  title: "Idol World Store",
+  description: "Tu tienda K-pop de confianza",
 };
 
 export default function RootLayout({
@@ -26,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />

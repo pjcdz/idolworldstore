@@ -21,7 +21,7 @@ interface GO {
 const mockGOs: GO[] = [
   {
     id: '1',
-    title: "NewJeans 'Get Up' Bunny Beach Bag Ver.",
+    title: "NewJeans 'Get Up' Bolso de Playa Ver. Conejito",
     organizer: 'NJFanClub',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDaH4ZrWBEGk0q1kOKq5u1vWmeDZwZSK2sZc-y1b0Ckg9uWK0TlTRw_i_ubvewF9cOdrlUd2yyEMAoz4bB8yVTTKIdLCVgK1lCIDj_JSa3I4Kuf_6oEyiPs0D4j8OfEFCl99kniXbRovUsONYR_6YEkNJ77H7gxBKlwEvQxBzGSl7_6VDsJajKFybsTo4iojpOLaz6imhKL_mIxQErYsuUswibG4H1_1z5H8OQS_qupspugTD2X5TmXRxU0hqdOHZ3AijthjOj0Da-Q',
     currentParticipants: 85,
@@ -33,7 +33,7 @@ const mockGOs: GO[] = [
   },
   {
     id: '2',
-    title: 'LE SSERAFIM Official Light Stick',
+    title: 'LE SSERAFIM Light Stick Oficial',
     organizer: 'FearnotGOs',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuApYkfr6XU6UlpRZ_FaZCL0IYgtCDEbbwz73-0G7lKKdw-XC_JDd7ktC3R64bKIyvt1DpTnj0ehqhYlN4TGBcmjU5yB6WzqdNgWi_r9blz95BDfG4t3Xvoe8gqEBbhBs8yJUv9w9_bQg1xKJ6ReIIyRYn3fGxpXTmZrgTpjrysWN37wAUenDh8aIV4aVnNArW1k-vNNLoFEad9AxLHHxXkadRvUtkhEbgy8fHj3_YVWzs-6Jby8htGHtBP7FPdkvqX_IS3Svkxa4Rc7',
     currentParticipants: 192,
@@ -46,7 +46,7 @@ const mockGOs: GO[] = [
   },
   {
     id: '3',
-    title: "aespa 'Armageddon' Exclusive Photocards",
+    title: "aespa 'Armageddon' Photocards Exclusivas",
     organizer: 'MYCollectibles',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAmn11B0bR6PHc_O--Sbi-mVUepsCN0UTz2hpvFAeGKDTnwRWM2jaKDl4CNr7dVy5WQ0vNjxx56BwP3L2ox_X3dU1gkvLPe2Zz9k9JU3GgZkSHIauf1gVmPk9zVS1pfs6ztZv0eBkyOBhuD-X5i5ysu1wk1EMmhShrtDn79t2pahkFejqv8dTK9-b5h5dG5bWt7DGUEM_TF_U9fU3tOmlYmd99iZarzGyJvl81YEtoX1m6BJosTM5kVR_ZxebvyFX9X2id1odPL1_n6',
     currentParticipants: 45,
@@ -249,7 +249,7 @@ export default function GOs() {
                   {/* Progress Section */}
                   <div className="mb-4">
                     <div className="flex justify-between text-xs text-gray-600 mb-1.5">
-                      <span>Participants: {go.currentParticipants}/{go.maxParticipants}</span>
+                      <span>Participantes: {go.currentParticipants}/{go.maxParticipants}</span>
                       <span className="font-medium text-gray-800">{Math.round(progressPercentage)}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
@@ -276,7 +276,7 @@ export default function GOs() {
                       className={`heart-icon ${go.isLiked ? 'liked' : ''} ${isCelebrating ? 'heart-celebrate' : ''} 
                         p-2 rounded-full hover:bg-gray-100 transition-all duration-200 ease-out transform 
                         hover:scale-110 active:scale-125 relative`}
-                      aria-label={go.isLiked ? "Unlike item" : "Like item"}
+                      aria-label={go.isLiked ? "Quitar de favoritos" : "Agregar a favoritos"}
                     >
                       <span className="material-icons text-2xl align-middle">
                         {go.isLiked ? 'favorite' : 'favorite_border'}
@@ -312,7 +312,7 @@ export default function GOs() {
                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
                   >
                     <span className="mr-2">🎉</span>
-                    Join Group Order
+                    Unirme al Group Order
                     <span className="ml-2">✨</span>
                   </Button>
                 </div>
