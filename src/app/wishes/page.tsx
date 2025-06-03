@@ -45,7 +45,8 @@ const mockWishes: Wish[] = [
     createdAt: "Hace 5h",
     isLiked: false,
     estimatedPrice: 45.0,
-    description: "Album con fotos exclusivas que no encontramos en ningún lado 💕",
+    description:
+      "Album con fotos exclusivas que no encontramos en ningún lado 💕",
   },
   {
     id: "3",
@@ -473,7 +474,8 @@ export default function Wishes() {
                   </h2>
 
                   <p className="text-sm text-gray-600 mb-2">
-                    Pedido por <span className="font-medium">{wish.requester}</span>
+                    Pedido por{" "}
+                    <span className="font-medium">{wish.requester}</span>
                   </p>
 
                   {wish.description && (
@@ -503,9 +505,7 @@ export default function Wishes() {
                         p-2 rounded-full hover:bg-gray-100 transition-all duration-200 ease-out transform 
                         hover:scale-110 active:scale-125 relative`}
                       aria-label={
-                        wish.isLiked
-                          ? "Quitar like"
-                          : "Dar like a este deseo"
+                        wish.isLiked ? "Quitar like" : "Dar like a este deseo"
                       }
                     >
                       <span className="material-icons text-2xl align-middle">
@@ -571,8 +571,8 @@ export default function Wishes() {
                 ¡Más deseos, más posibilidades!
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Los deseos con más likes tienen más posibilidades de convertirse en Group Orders. 
-                ¡Apoya los deseos que más te gusten! 💜
+                Los deseos con más likes tienen más posibilidades de convertirse
+                en Group Orders. ¡Apoya los deseos que más te gusten! 💜
               </p>
             </div>
           </div>

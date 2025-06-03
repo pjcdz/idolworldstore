@@ -244,6 +244,78 @@ export default function GOs() {
 
         {/* Main Content */}
         <main className="p-4 space-y-6 relative z-0">
+          {/* Group Orders Header Banner */}
+          <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl p-6 text-white overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 left-0 w-24 h-24 bg-white rounded-full -translate-x-12 -translate-y-12"></div>
+              <div className="absolute top-1/4 right-0 w-16 h-16 bg-white rounded-full translate-x-8"></div>
+              <div className="absolute bottom-0 left-1/4 w-12 h-12 bg-white rounded-full translate-y-6"></div>
+              <div className="absolute top-1/2 left-1/2 w-8 h-8 bg-white rounded-full -translate-x-4 -translate-y-4"></div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-4">
+                {/* Left Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <span className="text-xl">🤝</span>
+                    </div>
+                    <h1 className="text-2xl font-bold text-white truncate">
+                      Group Orders
+                    </h1>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+                    <span className="text-purple-100 text-xs font-medium">
+                      Colabora con otros fans
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Stats */}
+                <div className="relative shrink-0 self-center">
+                  <div className="absolute inset-0 bg-white/20 rounded-xl blur-lg"></div>
+                  <div className="relative bg-white/10 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20">
+                    <div className="text-2xl font-bold bg-gradient-to-b from-white to-purple-100 bg-clip-text text-transparent text-center">
+                      {gos.reduce((sum, go) => sum + go.currentParticipants, 0)}
+                    </div>
+                    <div className="text-purple-100 text-xs text-center">
+                      participantes
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="mb-4">
+                <p className="text-purple-100 text-sm leading-relaxed">
+                  Únete a fans como tú para hacer pedidos grupales. 
+                  <span className="text-white font-medium"> ¡Juntos compramos más barato!</span>
+                </p>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/20">
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="text-base">💸</span>
+                  <span className="text-purple-100 text-xs">Menos costo</span>
+                </div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="text-base">📦</span>
+                  <span className="text-purple-100 text-xs">Envío grupal</span>
+                </div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="text-base">💜</span>
+                  <span className="text-purple-100 text-xs">Comunidad</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Delivery Indicator - NEW */}
           <DeliveryIndicator />
 
