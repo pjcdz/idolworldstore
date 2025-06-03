@@ -180,13 +180,17 @@ export default function Store() {
 
         /* Ripple effect like Instagram */
         .heart-icon::before {
-          content: '';
+          content: "";
           position: absolute;
           top: 50%;
           left: 50%;
           width: 0;
           height: 0;
-          background: radial-gradient(circle, rgba(127, 35, 253, 0.3) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(127, 35, 253, 0.3) 0%,
+            transparent 70%
+          );
           border-radius: 50%;
           transform: translate(-50%, -50%);
           opacity: 0;
@@ -288,24 +292,24 @@ export default function Store() {
           font-weight: bold;
         }
 
-        .floating-heart:nth-child(1) { 
-          font-size: 20px; 
+        .floating-heart:nth-child(1) {
+          font-size: 20px;
           animation-duration: 1.8s;
         }
-        .floating-heart:nth-child(2) { 
-          font-size: 24px; 
+        .floating-heart:nth-child(2) {
+          font-size: 24px;
           animation-duration: 2.2s;
         }
-        .floating-heart:nth-child(3) { 
-          font-size: 18px; 
+        .floating-heart:nth-child(3) {
+          font-size: 18px;
           animation-duration: 2s;
         }
-        .floating-heart:nth-child(4) { 
-          font-size: 22px; 
+        .floating-heart:nth-child(4) {
+          font-size: 22px;
           animation-duration: 1.9s;
         }
-        .floating-heart:nth-child(5) { 
-          font-size: 16px; 
+        .floating-heart:nth-child(5) {
+          font-size: 16px;
           animation-duration: 2.1s;
         }
 
@@ -380,9 +384,15 @@ export default function Store() {
           animation: pulse-ring 1.5s ease-out forwards;
         }
 
-        .pulse-ring:nth-child(1) { animation-delay: 0s; }
-        .pulse-ring:nth-child(2) { animation-delay: 0.3s; }
-        .pulse-ring:nth-child(3) { animation-delay: 0.6s; }
+        .pulse-ring:nth-child(1) {
+          animation-delay: 0s;
+        }
+        .pulse-ring:nth-child(2) {
+          animation-delay: 0.3s;
+        }
+        .pulse-ring:nth-child(3) {
+          animation-delay: 0.6s;
+        }
 
         @keyframes pulse-ring {
           0% {
