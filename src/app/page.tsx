@@ -172,36 +172,36 @@ export default function GOs() {
         }
       `}</style>
 
-      <div className="min-h-screen bg-zinc-900">
+      <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="p-4 flex justify-between items-center sticky top-0 z-10 bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800/50">
+        <header className="p-4 flex justify-between items-center sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
           <div className="flex items-center space-x-2">
-            <span className="material-icons text-2xl text-zinc-100">groups</span>
+            <span className="material-icons text-2xl text-gray-800">groups</span>
             <Button
               variant="ghost"
               size="icon"
-              className="p-2 rounded-full hover:bg-zinc-700/60 transition-all duration-200 text-zinc-300 hover:text-purple-400"
+              className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 text-gray-600 hover:text-purple-600"
             >
               <span className="material-icons">filter_list</span>
             </Button>
           </div>
           
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <span className="font-mono text-2xl font-bold text-zinc-100 tracking-wider">IWS</span>
+            <span className="font-mono text-2xl font-bold text-gray-900 tracking-wider">IWS</span>
           </div>
           
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
               size="icon"
-              className="p-2 rounded-full hover:bg-zinc-700/60 transition-all duration-200 text-zinc-300 hover:text-purple-400"
+              className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 text-gray-600 hover:text-purple-600"
             >
               <span className="material-icons">search</span>
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="p-2 rounded-full hover:bg-zinc-700/60 transition-all duration-200 text-zinc-300 hover:text-purple-400"
+              className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 text-gray-600 hover:text-purple-600"
             >
               <span className="material-icons">person</span>
             </Button>
@@ -220,7 +220,7 @@ export default function GOs() {
             return (
               <div
                 key={go.id}
-                className={`bg-zinc-800 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 ease-out card-hover transform ${
+                className={`bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-out card-hover transform border border-gray-200/50 ${
                   isCelebrating ? 'scale-105' : ''
                 }`}
               >
@@ -232,11 +232,6 @@ export default function GOs() {
                     src={go.image}
                   />
                   
-                  {/* Time Badge */}
-                  <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-2.5 py-1.5 rounded-full backdrop-blur-sm shadow-md">
-                    Ends in: {go.endTime}
-                  </div>
-                  
                   {/* Popular Badge */}
                   {go.isPopular && (
                     <div className="popular-badge absolute bottom-3 left-3 bg-red-600 text-white text-[11px] px-2.5 py-1 rounded-md font-semibold tracking-wide shadow-md">
@@ -247,17 +242,17 @@ export default function GOs() {
 
                 {/* Content Section */}
                 <div className="p-5">
-                  <h2 className="text-lg font-semibold text-zinc-100 mb-3 truncate" title={go.title}>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-3 truncate" title={go.title}>
                     {go.title}
                   </h2>
 
                   {/* Progress Section */}
                   <div className="mb-4">
-                    <div className="flex justify-between text-xs text-zinc-300 mb-1.5">
+                    <div className="flex justify-between text-xs text-gray-600 mb-1.5">
                       <span>Participants: {go.currentParticipants}/{go.maxParticipants}</span>
-                      <span className="font-medium text-zinc-100">{Math.round(progressPercentage)}%</span>
+                      <span className="font-medium text-gray-800">{Math.round(progressPercentage)}%</span>
                     </div>
-                    <div className="w-full bg-zinc-700 rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                       <div
                         className="progress-bar-fill h-2.5 rounded-full"
                         style={{ width: `${progressPercentage}%` }}
@@ -267,10 +262,10 @@ export default function GOs() {
 
                   {/* Price and Like Section */}
                   <div className="flex justify-between items-center mb-4">
-                    <div className="text-zinc-100">
+                    <div className="text-gray-900">
                       <span className="text-xl font-bold">${go.price.toFixed(2)}</span>
                       {go.originalPrice && (
-                        <span className="text-sm text-zinc-500 line-through ml-1.5">
+                        <span className="text-sm text-gray-500 line-through ml-1.5">
                           ${go.originalPrice.toFixed(2)}
                         </span>
                       )}
@@ -279,7 +274,7 @@ export default function GOs() {
                     <button
                       onClick={() => toggleLike(go.id)}
                       className={`heart-icon ${go.isLiked ? 'liked' : ''} ${isCelebrating ? 'heart-celebrate' : ''} 
-                        p-2 rounded-full hover:bg-zinc-700/60 transition-all duration-200 ease-out transform 
+                        p-2 rounded-full hover:bg-gray-100 transition-all duration-200 ease-out transform 
                         hover:scale-110 active:scale-125 relative`}
                       aria-label={go.isLiked ? "Unlike item" : "Like item"}
                     >

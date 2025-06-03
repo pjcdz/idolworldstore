@@ -94,7 +94,7 @@ const BottomNav = () => {
         }
       `}</style>
       
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-zinc-800/95 backdrop-blur-md border-t border-zinc-700/50 flex justify-around items-center z-50 shadow-lg">
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-gray-200/50 flex justify-around items-center z-50 shadow-lg">
         {navItems.map((item) => {
           const active = isActive(item.href);
           return (
@@ -102,9 +102,9 @@ const BottomNav = () => {
               key={item.id}
               href={item.href}
               className={`nav-item ${active ? 'active' : ''} ${pressedItem === item.id ? 'pressed' : ''} 
-                flex flex-col items-center justify-center text-zinc-400 hover:text-purple-400 
+                flex flex-col items-center justify-center text-gray-500 hover:text-purple-500 
                 w-1/3 py-2.5 transition-all duration-300 ease-out transform 
-                focus:outline-none focus:bg-zinc-700/30 rounded-lg relative overflow-hidden
+                focus:outline-none focus:bg-gray-100/50 rounded-lg relative overflow-hidden
                 active:scale-95`}
               onTouchStart={() => setPressedItem(item.id)}
               onTouchEnd={() => {
