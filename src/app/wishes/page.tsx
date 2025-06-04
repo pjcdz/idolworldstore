@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Header } from "@/components/header";
 
 interface Wish {
   id: string;
@@ -454,52 +455,14 @@ export default function Wishes() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="p-4 flex justify-between items-center sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
-          <div className="flex items-center space-x-2">
-            <span className="material-icons text-2xl text-gray-800">
-              card_giftcard
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 text-gray-600 hover:text-purple-600"
-            >
-              <span className="material-icons">filter_list</span>
-            </Button>
-          </div>
-
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="relative">
-              {/* Logo background glow */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 blur-sm opacity-30 scale-110"></div>
-
-              {/* Main logo */}
-              <span className="relative font-mono text-2xl font-bold bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 bg-clip-text text-transparent tracking-wider drop-shadow-sm">
-                I<span className="text-3xl">W</span>S
-              </span>
-
-              {/* Subtle underline accent */}
-              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 opacity-60"></div>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 text-gray-600 hover:text-purple-600"
-            >
-              <span className="material-icons">search</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 text-gray-600 hover:text-purple-600"
-            >
-              <span className="material-icons">person</span>
-            </Button>
-          </div>
-        </header>
+        <Header
+          leftIcon="card_giftcard"
+          secondIcon="filter_list"
+          rightIcon="search"
+          secondIconAction={() => console.log("Filter clicked")}
+          rightIconAction={() => console.log("Search clicked")}
+          userIconAction={() => console.log("Profile clicked")}
+        />
 
         {/* Main Content */}
         <main className="p-4 space-y-6 relative z-0">
