@@ -92,6 +92,78 @@ export default function GOs() {
   return (
     <>
       <style jsx global>{`
+        /* Mobile responsive fixes for text truncation */
+        .group-orders-title {
+          font-size: clamp(1.2rem, 4vw, 2rem);
+          line-height: 1.2;
+          word-break: break-word;
+          hyphens: auto;
+        }
+
+        .benefits-container {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 0.5rem;
+        }
+
+        .benefit-item {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.375rem;
+          font-size: clamp(0.65rem, 2.5vw, 0.75rem);
+          line-height: 1.3;
+          min-width: 0;
+          text-align: center;
+        }
+
+        .benefit-text {
+          flex: 1;
+          word-break: break-word;
+          hyphens: auto;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* Responsive adjustments for very small screens */
+        @media (max-width: 375px) {
+          .group-orders-title {
+            font-size: 1.1rem;
+          }
+
+          .benefit-item {
+            font-size: 0.6rem;
+            gap: 0.25rem;
+          }
+
+          .main-description {
+            font-size: 0.75rem;
+            line-height: 1.4;
+          }
+
+          .stats-container {
+            font-size: 0.7rem;
+          }
+
+          .benefit-text {
+            white-space: normal;
+          }
+        }
+
+        /* Ultra-small screens (iPhone SE, etc.) */
+        @media (max-width: 320px) {
+          .group-orders-title {
+            font-size: 1rem;
+          }
+
+          .benefit-item {
+            font-size: 0.55rem;
+            gap: 0.2rem;
+          }
+        }
+
         .heart-icon {
           color: #a1a1aa;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -435,7 +507,7 @@ export default function GOs() {
                     <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
                       <span className="text-xl">🤝</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-white truncate">
+                    <h1 className="text-2xl font-bold text-white truncate group-orders-title">
                       Group Orders
                     </h1>
                   </div>
@@ -464,7 +536,7 @@ export default function GOs() {
 
               {/* Description */}
               <div className="mb-4">
-                <p className="text-purple-100 text-sm leading-relaxed">
+                <p className="text-purple-100 text-sm leading-relaxed main-description">
                   Únete a fans como tú para hacer pedidos grupales.
                   <span className="text-white font-medium">
                     {" "}
@@ -474,18 +546,24 @@ export default function GOs() {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/20">
-                <div className="flex items-center justify-center gap-1.5">
+              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/20 benefits-container">
+                <div className="flex items-center justify-center gap-1.5 benefit-item">
                   <span className="text-base">💸</span>
-                  <span className="text-purple-100 text-xs">Menos costo</span>
+                  <span className="text-purple-100 text-xs benefit-text">
+                    Menos costo
+                  </span>
                 </div>
-                <div className="flex items-center justify-center gap-1.5">
+                <div className="flex items-center justify-center gap-1.5 benefit-item">
                   <span className="text-base">📦</span>
-                  <span className="text-purple-100 text-xs">Envío grupal</span>
+                  <span className="text-purple-100 text-xs benefit-text">
+                    Envío grupal
+                  </span>
                 </div>
-                <div className="flex items-center justify-center gap-1.5">
+                <div className="flex items-center justify-center gap-1.5 benefit-item">
                   <span className="text-base">💜</span>
-                  <span className="text-purple-100 text-xs">Comunidad</span>
+                  <span className="text-purple-100 text-xs benefit-text">
+                    Comunidad
+                  </span>
                 </div>
               </div>
             </div>
