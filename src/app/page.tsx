@@ -62,7 +62,10 @@ const mockGOs: GO[] = [
 ];
 
 export default function GOs() {
-  const [gos, setGos] = useState<GO[]>(mockGOs);
+  const [gos, setGos] = useState<GO[]>(
+    // Ordenar los GOs por número de participantes de mayor a menor
+    mockGOs.sort((a, b) => b.currentParticipants - a.currentParticipants)
+  );
   const [celebratingItems, setCelebratingItems] = useState<Set<string>>(
     new Set()
   );
