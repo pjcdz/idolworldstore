@@ -91,6 +91,7 @@ export default function GOs() {
     const button = document.querySelector(`[data-join="${id}"]`);
     button?.classList.add("join-celebrate");
     setTimeout(() => button?.classList.remove("join-celebrate"), 800);
+    window.location.href = `/go/${id}`;
   };
 
   return (
