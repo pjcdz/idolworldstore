@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/header";
@@ -9,12 +9,12 @@ interface Wish {
   id: string;
   title: string;
   requester: string;
-  image: string;
+  images: string[];
   likes: number;
   category: string;
-  createdAt: string;
   isLiked: boolean;
-  estimatedPrice?: number;
+  priceUSD: number;
+  priceARS: number;
   description?: string;
   isHot?: boolean;
   isRecent?: boolean;
@@ -23,72 +23,78 @@ interface Wish {
 const mockWishes: Wish[] = [
   {
     id: "1",
-    title: "SEVENTEEN 'God of Music' Lightstick Ver. 3",
-    requester: "CaratForever",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDaH4ZrWBEGk0q1kOKq5u1vWmeDZwZSK2sZc-y1b0Ckg9uWK0TlTRw_i_ubvewF9cOdrlUd2yyEMAoz4bB8yVTTKIdLCVgK1lCIDj_JSa3I4Kuf_6oEyiPs0D4j8OfEFCl99kniXbRovUsONYR_6YEkNJ77H7gxBKlwEvQxBzGSl7_6VDsJajKFybsTo4iojpOLaz6imhKL_mIxQErYsuUswibG4H1_1z5H8OQS_qupspugTD2X5TmXRxU0hqdOHZ3AijthjOj0Da-Q",
-    likes: 156,
-    category: "Lightsticks",
-    createdAt: "Hace 2h",
+    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Canvas Ver.]",
+    requester: "OnceCollector",
+    images: [
+      "https://m.media-amazon.com/images/I/51XKuit1M+L._AC_SL1000_.jpg",
+      "https://m.media-amazon.com/images/I/61avyfCFixL._AC_SL1440_.jpg"
+    ],
+    likes: 289,
+    category: "Albums",
     isLiked: true,
-    estimatedPrice: 65.0,
-    description: "¡Por favor necesitamos el nuevo lightstick de SVT! 🔥",
-    isHot: true,
+    priceUSD: 60,
+    priceARS: 80561,
+    description: "1st Mini Album de Chaeyoung (Canvas Version). Edición coleccionable para fans de TWICE.",
   },
   {
     id: "2",
-    title: "IVE 'I AM' Album Photobook Edición Limitada",
-    requester: "DiveCollector",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuApYkfr6XU6UlpRZ_FaZCL0IYgtCDEbbwz73-0G7lKKdw-XC_JDd7ktC3R64bKIyvt1DpTnj0ehqhYlN4TGBcmjU5yB6WzqdNgWi_r9blz95BDfG4t3Xvoe8gqEBbhBs8yJUv9w9_bQg1xKJ6ReIIyRYn3fGxpXTmZrgTpjrysWN37wAUenDh8aIV4aVnNArW1k-vNNLoFEad9AxLHHxXkadRvUtkhEbgy8fHj3_YVWzs-6Jby8htGHtBP7FPdkvqX_IS3Svkxa4Rc7",
-    likes: 89,
+    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Standard Ver. - Murmur]",
+    requester: "ChaeWish",
+    images: [
+      "https://m.media-amazon.com/images/I/31k7IBkiKVL._AC_SL1000_.jpg",
+      "https://m.media-amazon.com/images/I/51DpvD5qqDL._AC_SL1000_.jpg"
+    ],
+    likes: 245,
     category: "Albums",
-    createdAt: "Hace 5h",
     isLiked: false,
-    estimatedPrice: 45.0,
-    description:
-      "Album con fotos exclusivas que no encontramos en ningún lado 💕",
+    priceUSD: 70,
+    priceARS: 93988,
+    description: "TWICE Chaeyoung 1st solo album, versión estándar Murmur. Incluye photobook y contenido exclusivo.",
   },
   {
     id: "3",
-    title: "(G)I-DLE Minnie Photocard Set Oficial",
-    requester: "NeverbandFan",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAmn11B0bR6PHc_O--Sbi-mVUepsCN0UTz2hpvFAeGKDTnwRWM2jaKDl4CNr7dVy5WQ0vNjxx56BwP3L2ox_X3dU1gkvLPe2Zz9k9JU3GgZkSHIauf1gVmPk9zVS1pfs6ztZv0eBkyOBhuD-X5i5ysu1wk1EMmhShrtDn79t2pahkFejqv8dTK9-b5h5dG5bWt7DGUEM_TF_U9fU3tOmlYmd99iZarzGyJvl81YEtoX1m6BJosTM5kVR_ZxebvyFX9X2id1odPL1_n6",
-    likes: 234,
-    category: "Photocards",
-    createdAt: "Hace 1d",
+    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Sparkle POB JYP]",
+    requester: "POBHunter",
+    images: [
+      "https://m.media-amazon.com/images/I/31BNX6OJNHL._AC_.jpg",
+      "https://m.media-amazon.com/images/I/5144VbP7VhL._AC_SL1024_.jpg"
+    ],
+    likes: 198,
+    category: "Albums",
     isLiked: true,
-    estimatedPrice: 28.0,
-    description: "Las photocards de Minnie son imposibles de conseguir 😭",
-    isHot: true,
+    priceUSD: 44,
+    priceARS: 59078,
+    description: "[EXCLUSIVE POB] Sparkle Version con CD + Pre-Order Gift oficial de JYP Fans Shop.",
   },
   {
     id: "4",
-    title: "NewJeans Bunny Hat Oficial Merchandise",
-    requester: "BunnyLover",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDaH4ZrWBEGk0q1kOKq5u1vWmeDZwZSK2sZc-y1b0Ckg9uWK0TlTRw_i_ubvewF9cOdrlUd2yyEMAoz4bB8yVTTKIdLCVgK1lCIDj_JSa3I4Kuf_6oEyiPs0D4j8OfEFCl99kniXbRovUsONYR_6YEkNJ77H7gxBKlwEvQxBzGSl7_6VDsJajKFybsTo4iojpOLaz6imhKL_mIxQErYsuUswibG4H1_1z5H8OQS_qupspugTD2X5TmXRxU0hqdOHZ3AijthjOj0Da-Q",
-    likes: 67,
-    category: "Merchandise",
-    createdAt: "Hace 3h",
+    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Sparkle Ver. WithMuu]",
+    requester: "WithMuuFan",
+    images: [
+      "https://m.media-amazon.com/images/I/61ThxtMcVYL._AC_SL1500_.jpg",
+      "https://m.media-amazon.com/images/I/71nMZ7qil3L._AC_SL1500_.jpg",
+      "https://m.media-amazon.com/images/I/71jwOsx6yvL._AC_SL1500_.jpg"
+    ],
+    likes: 322,
+    category: "Albums",
     isLiked: false,
-    estimatedPrice: 35.0,
-    description: "El gorro de conejito más tierno que he visto ✨",
-    isRecent: true,
+    priceUSD: 50,
+    priceARS: 67134,
+    description: "[WITHMUU POB Exclusive] Digipack Sparkle Version. Edición exclusiva y sellada.",
   },
   {
     id: "5",
-    title: "TWICE Nayeon Solo Album 'IM NAYEON' Vinyl",
-    requester: "OnceVinyl",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuApYkfr6XU6UlpRZ_FaZCL0IYgtCDEbbwz73-0G7lKKdw-XC_JDd7ktC3R64bKIyvt1DpTnj0ehqhYlN4TGBcmjU5yB6WzqdNgWi_r9blz95BDfG4t3Xvoe8gqEBbhBs8yJUv9w9_bQg1xKJ6ReIIyRYn3fGxpXTmZrgTpjrysWN37wAUenDh8aIV4aVnNArW1k-vNNLoFEad9AxLHHxXkadRvUtkhEbgy8fHj3_YVWzs-6Jby8htGHtBP7FPdkvqX_IS3Svkxa4Rc7",
-    likes: 143,
-    category: "Vinyl",
-    createdAt: "Hace 6h",
-    isLiked: false,
-    estimatedPrice: 75.0,
-    description: "¡Necesito este vinyl en mi colección! 🎵",
+    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Avocado Pit Vinyl]",
+    requester: "VinylOnce",
+    images: [
+      "https://m.media-amazon.com/images/I/516wNdo-8hL._SL1500_.jpg"
+    ],
+    likes: 156,
+    category: "Albums",
+    isLiked: true,
+    priceUSD: 60,
+    priceARS: 80561,
+    description: "Vinilo edición especial Avocado Pit del primer mini álbum de Chaeyoung.",
   },
 ];
 
@@ -99,6 +105,49 @@ export default function Wishes() {
   const [celebratingItems, setCelebratingItems] = useState<Set<string>>(
     new Set()
   );
+  const [currentImageIndex, setCurrentImageIndex] = useState<{[key: string]: number}>({});
+  const [modalImage, setModalImage] = useState<string | null>(null);
+
+  const nextImage = (wishId: string, totalImages: number) => {
+    setCurrentImageIndex(prev => ({
+      ...prev,
+      [wishId]: ((prev[wishId] || 0) + 1) % totalImages
+    }));
+  };
+
+  const prevImage = (wishId: string, totalImages: number) => {
+    setCurrentImageIndex(prev => ({
+      ...prev,
+      [wishId]: ((prev[wishId] || 0) - 1 + totalImages) % totalImages
+    }));
+  };
+
+  const openModal = (imageUrl: string) => {
+    setModalImage(imageUrl);
+  };
+
+  const closeModal = () => {
+    setModalImage(null);
+  };
+
+  // Handle keyboard navigation for modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (modalImage && event.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    if (modalImage) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [modalImage]);
 
   const toggleLike = (id: string) => {
     setWishes((prev) =>
@@ -137,6 +186,47 @@ export default function Wishes() {
   return (
     <>
       <style jsx global>{`
+        /* Carousel and Modal Styles */
+        .carousel-nav {
+          backdrop-filter: blur(4px);
+          transition: all 0.3s ease;
+        }
+
+        .carousel-nav:hover {
+          transform: scale(1.1);
+        }
+
+        .image-modal {
+          animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .image-hover {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-hover:hover {
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Price styling */
+        .price-container {
+          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 12px;
+        }
+
         .heart-icon {
           color: #a1a1aa;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -525,22 +615,6 @@ export default function Wishes() {
                 <span className="text-lg">¿Qué artículo deseas?</span>
                 <span className="ml-3 text-xl">💫</span>
               </Button>
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="text-base">🔥</span>
-                  <span className="text-purple-100 text-xs">Tendencias</span>
-                </div>
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="text-base">💖</span>
-                  <span className="text-purple-100 text-xs">Comunidad</span>
-                </div>
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="text-base">🎯</span>
-                  <span className="text-purple-100 text-xs">Demanda</span>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -555,25 +629,47 @@ export default function Wishes() {
                   isCelebrating ? "scale-105" : ""
                 }`}
               >
-                {/* Image Section */}
-                <div className="relative">
-                  <img
-                    alt={wish.title}
-                    className="w-full h-60 object-cover"
-                    src={wish.image}
-                  />
-
-                  {/* Badges */}
-                  <div className="absolute top-3 left-3 flex flex-col gap-2">
-                    {wish.isHot && (
-                      <div className="hot-badge bg-red-600 text-white text-[11px] px-2.5 py-1 rounded-md font-semibold tracking-wide shadow-md">
-                        🔥 POPULAR
-                      </div>
-                    )}
-                    {wish.isRecent && (
-                      <div className="recent-badge text-white text-[11px] px-2.5 py-1 rounded-md font-semibold tracking-wide shadow-md">
-                        ✨ RECIENTE
-                      </div>
+                {/* Image Carousel Section */}
+                <div className="relative bg-white group">
+                  <div className="relative overflow-hidden">
+                    <img
+                      alt={wish.title}
+                      className="w-full h-60 object-contain bg-white cursor-pointer transition-transform hover:scale-105"
+                      src={wish.images[currentImageIndex[wish.id] || 0]}
+                      onClick={() => openModal(wish.images[currentImageIndex[wish.id] || 0])}
+                    />
+                    
+                    {/* Carousel Navigation */}
+                    {wish.images.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => prevImage(wish.id, wish.images.length)}
+                          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
+                        >
+                          <span className="material-icons text-lg">chevron_left</span>
+                        </button>
+                        <button
+                          onClick={() => nextImage(wish.id, wish.images.length)}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
+                        >
+                          <span className="material-icons text-lg">chevron_right</span>
+                        </button>
+                        
+                        {/* Image Indicators */}
+                        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
+                          {wish.images.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setCurrentImageIndex(prev => ({ ...prev, [wish.id]: index }))}
+                              className={`w-2 h-2 rounded-full transition-colors ${
+                                (currentImageIndex[wish.id] || 0) === index
+                                  ? 'bg-white'
+                                  : 'bg-white/50'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
                     )}
                   </div>
 
@@ -602,16 +698,11 @@ export default function Wishes() {
                   </div>
 
                   <h2
-                    className="text-lg font-semibold text-gray-900 mb-2 truncate"
+                    className="text-lg font-semibold text-gray-900 mb-2 leading-tight"
                     title={wish.title}
                   >
                     {wish.title}
                   </h2>
-
-                  <p className="text-sm text-gray-600 mb-2">
-                    Pedido por{" "}
-                    <span className="font-medium">{wish.requester}</span>
-                  </p>
 
                   {wish.description && (
                     <p className="text-sm text-gray-700 mb-3 line-clamp-2">
@@ -622,13 +713,13 @@ export default function Wishes() {
                   {/* Price and Time Section */}
                   <div className="flex justify-between items-center mb-4">
                     <div className="text-gray-900">
-                      {wish.estimatedPrice && (
+                      <div className="flex items-center gap-3">
                         <span className="text-lg font-bold text-purple-600">
-                          ~${wish.estimatedPrice.toFixed(2)}
+                          ${wish.priceUSD} USD
                         </span>
-                      )}
-                      <div className="text-xs text-gray-500 mt-1">
-                        {wish.createdAt}
+                        <span className="text-sm text-gray-600">
+                          ≈ ${wish.priceARS.toLocaleString()} ARS
+                        </span>
                       </div>
                     </div>
 
@@ -712,6 +803,29 @@ export default function Wishes() {
             </div>
           </div>
         </main>
+
+        {/* Image Modal */}
+        {modalImage && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm image-modal"
+            onClick={closeModal}
+          >
+            <div className="relative max-w-4xl max-h-screen m-4">
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
+              >
+                <span className="material-icons text-xl">close</span>
+              </button>
+              <img
+                src={modalImage}
+                alt="Imagen ampliada"
+                className="max-w-full max-h-screen object-contain rounded-lg shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
