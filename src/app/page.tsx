@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/header";
 import { LikeButton } from "@/components/like-button";
 import { LikesLoadingSkeleton } from "@/components/likes-loading-skeleton";
+import { MobileOnlyNotice } from "@/components/mobile-only-notice";
 import { useLikes } from "@/hooks/use-likes";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface Wish {
   id: string;
@@ -114,10 +116,20 @@ export default function HomePage() {
     totalLikes 
   } = useLikes(mockWishes);
   
+  const { isMobile, isLoading: isMobileLoading } = useMobile();
+  const [showMobileNotice, setShowMobileNotice] = useState(false);
+  
   const [currentImageIndex, setCurrentImageIndex] = useState<{
     [key: string]: number;
   }>({});
   const [modalImage, setModalImage] = useState<string | null>(null);
+
+  // Show mobile notice for non-mobile users
+  useEffect(() => {
+    if (!isMobileLoading && !isMobile) {
+      setShowMobileNotice(true);
+    }
+  }, [isMobile, isMobileLoading]);
 
   const nextImage = (wishId: string, totalImages: number) => {
     setCurrentImageIndex((prev) => ({
@@ -677,14 +689,46 @@ export default function HomePage() {
 
                   {/* Likes Counter - Top Right */}
                   <div className="absolute top-3 right-3">
-                    <div className="bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5">
-                      <span className="material-icons text-pink-400 text-sm">
-                        favorite
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleLike(wish.id);
+                      }}
+                      disabled={isLoadingLike}
+                      className={`bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 
+                        transition-all duration-300 ease-out hover:bg-black/70 hover:scale-110 active:scale-95
+                        ${isLoadingLike ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
+                        ${isCelebrating ? 'heart-celebrate' : ''}
+                        focus:outline-none focus:ring-2 focus:ring-pink-400/50`}
+                      aria-label={wish.isLiked ? "Quitar like" : "Dar like"}
+                    >
+                      <span className={`material-icons text-sm transition-all duration-200
+                        ${wish.isLiked ? 'text-pink-400' : 'text-pink-300'}`}>
+                        {isLoadingLike ? "hourglass_empty" : "favorite"}
                       </span>
                       <span className="text-white text-sm font-semibold likes-counter">
                         {wish.likes}
                       </span>
-                    </div>
+                      
+                      {/* Floating hearts effect for counter */}
+                      {isCelebrating && wish.isLiked && (
+                        <div className="floating-hearts">
+                          {[...Array(3)].map((_, i) => (
+                            <div
+                              key={i}
+                              className="floating-heart"
+                              style={{
+                                left: `${-5 + i * 8}px`,
+                                animationDelay: `${i * 0.15}s`,
+                              }}
+                            >
+                              💜
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </button>
                   </div>
                 </div>
 
@@ -787,6 +831,12 @@ export default function HomePage() {
             </div>
           </div>
         )}
+
+        {/* Mobile Only Notice */}
+        <MobileOnlyNotice
+          isVisible={showMobileNotice}
+          onClose={() => setShowMobileNotice(false)}
+        />
       </div>
     </>
   );
