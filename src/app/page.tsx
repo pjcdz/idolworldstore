@@ -11,6 +11,7 @@ import { MobileOnlyNotice } from "@/components/mobile-only-notice";
 import { ExchangeRateIndicator } from "@/components/exchange-rate-indicator";
 import GameifiedSearch from "@/components/gamified-search";
 import ProductStats from "@/components/product-stats";
+import ProductImageCarousel from "@/components/product-image-carousel";
 import { useLikes } from "@/hooks/use-likes";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProducts, type Product } from "@/hooks/use-products";
@@ -94,9 +95,6 @@ export default function HomePage() {
   const { isMobile, isLoading: isMobileLoading } = useMobile();
   const [showMobileNotice, setShowMobileNotice] = useState(false);
   
-  const [currentImageIndex, setCurrentImageIndex] = useState<{
-    [key: string]: number;
-  }>({});
   const [modalImage, setModalImage] = useState<string | null>(null);
 
   // Show mobile notice for non-mobile users
@@ -144,20 +142,6 @@ export default function HomePage() {
   }
 
   const isLoading = isLoadingProducts || isLoadingRate;
-
-  const nextImage = (wishId: string, totalImages: number) => {
-    setCurrentImageIndex((prev) => ({
-      ...prev,
-      [wishId]: ((prev[wishId] || 0) + 1) % totalImages,
-    }));
-  };
-
-  const prevImage = (wishId: string, totalImages: number) => {
-    setCurrentImageIndex((prev) => ({
-      ...prev,
-      [wishId]: ((prev[wishId] || 0) - 1 + totalImages) % totalImages,
-    }));
-  };
 
   const openModal = (imageUrl: string) => {
     setModalImage(imageUrl);
@@ -207,61 +191,13 @@ export default function HomePage() {
               }`}
             >
             {/* Image Carousel Section */}
-            <div className="relative bg-white group">
-              <div className="relative overflow-hidden">
-                <Image
-                  alt={wish.title}
-                  className="w-full h-60 object-contain bg-white cursor-pointer transition-transform hover:scale-105"
-                  src={wish.images[currentImageIndex[wish.id] || 0]}
-                  width={400}
-                  height={240}
-                  onClick={() =>
-                    openModal(wish.images[currentImageIndex[wish.id] || 0])
-                  }
-                />
-
-                {/* Carousel Navigation */}
-                {wish.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => prevImage(wish.id, wish.images.length)}
-                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
-                    >
-                      <span className="material-icons text-lg">
-                        chevron_left
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => nextImage(wish.id, wish.images.length)}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
-                    >
-                      <span className="material-icons text-lg">
-                        chevron_right
-                      </span>
-                    </button>
-
-                    {/* Image Indicators */}
-                    <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
-                      {wish.images.map((_: string, index: number) => (
-                        <button
-                          key={index}
-                          onClick={() =>
-                            setCurrentImageIndex((prev) => ({
-                              ...prev,
-                              [wish.id]: index,
-                            }))
-                          }
-                          className={`w-2 h-2 rounded-full transition-colors ${
-                            (currentImageIndex[wish.id] || 0) === index
-                              ? "bg-white"
-                              : "bg-white/50"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+            <div className="relative">
+              <ProductImageCarousel
+                images={wish.images}
+                productTitle={wish.title}
+                onImageClick={openModal}
+                className="relative"
+              />
 
               {/* Likes Counter - Top Right */}
               <div className="absolute top-3 right-3">
@@ -357,16 +293,6 @@ export default function HomePage() {
   return (
     <>
       <style jsx global>{`
-        /* Carousel and Modal Styles */
-        .carousel-nav {
-          backdrop-filter: blur(4px);
-          transition: all 0.3s ease;
-        }
-
-        .carousel-nav:hover {
-          transform: scale(1.1);
-        }
-
         .image-modal {
           animation: modalFadeIn 0.3s ease-out;
         }
@@ -893,7 +819,7 @@ export default function HomePage() {
             <div className="relative max-w-4xl max-h-screen m-4">
               <button
                 onClick={closeModal}
-                className="absolute top-4 right-4 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
+                className="absolute top-4 right-4 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all shadow-lg hover:scale-110"
               >
                 <span className="material-icons text-xl">close</span>
               </button>
