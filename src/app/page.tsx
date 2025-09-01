@@ -9,6 +9,8 @@ import { LikeButton } from "@/components/like-button";
 import { LikesLoadingSkeleton } from "@/components/likes-loading-skeleton";
 import { MobileOnlyNotice } from "@/components/mobile-only-notice";
 import { ExchangeRateIndicator } from "@/components/exchange-rate-indicator";
+import GameifiedSearch from "@/components/gamified-search";
+import ProductStats from "@/components/product-stats";
 import { useLikes } from "@/hooks/use-likes";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProducts, type Product } from "@/hooks/use-products";
@@ -22,15 +24,27 @@ interface ProductWithLikes extends Product {
 }
 
 export default function HomePage() {
-  // Obtener productos desde la base de datos
+  // Estado para filtros de búsqueda gamificada
+  const [searchFilters, setSearchFilters] = useState<{
+    group?: string;
+    member?: string;
+    category?: string;
+    tags?: string[];
+  }>({});
+
+  // Obtener productos desde la base de datos con filtros
   const { 
     products, 
+    exactProducts,
+    relatedProducts,
     isLoading: isLoadingProducts, 
     error: productsError,
     refetch: refetchProducts,
+    exactCount,
+    relatedCount,
     incrementLike,
     decrementLike
-  } = useProducts();
+  } = useProducts(searchFilters);
 
   // Obtener tipo de cambio USD/ARS
   const { convertUsdToArs, isLoading: isLoadingRate } = useExchangeRate();
@@ -44,12 +58,17 @@ export default function HomePage() {
   } = useLikes();
 
   // Transformar productos con estado de likes y precios calculados
-  const wishes: ProductWithLikes[] = products.map(product => ({
-    ...product,
-    isLiked: userLikes.has(product.id), // Estado local del usuario
-    priceUSD: product.price_usd, // Alias para compatibilidad
-    priceARS: convertUsdToArs(product.price_usd), // Calculado dinámicamente
-  }));
+  const transformProducts = (productList: Product[]): ProductWithLikes[] => 
+    productList.map(product => ({
+      ...product,
+      isLiked: userLikes.has(product.id), // Estado local del usuario
+      priceUSD: product.price_usd, // Alias para compatibilidad
+      priceARS: convertUsdToArs(product.price_usd), // Calculado dinámicamente
+    }));
+
+  const exactWishes = transformProducts(exactProducts);
+  const relatedWishes = transformProducts(relatedProducts);
+  const wishes = transformProducts(products); // Para compatibilidad con el código existente
 
   // Función de toggle optimizada que actualiza inmediatamente
   const toggleLike = async (id: string) => {
@@ -155,6 +174,184 @@ export default function HomePage() {
     const button = document.querySelector(`[data-create-wish]`);
     button?.classList.add("create-celebrate");
     setTimeout(() => button?.classList.remove("create-celebrate"), 800);
+  };
+
+  // Función para renderizar una lista de productos
+  const renderProductList = (productList: ProductWithLikes[], sectionTitle?: string) => {
+    if (productList.length === 0) return null;
+
+    return (
+      <>
+        {sectionTitle && sectionTitle !== 'exact' && (
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+            <h3 className="text-lg font-semibold text-gray-700 px-4 bg-gray-50 rounded-full">
+              {sectionTitle}
+            </h3>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+          </div>
+        )}
+        
+        {productList.map((wish, index) => {
+          const isCelebrating = celebratingItems.has(wish.id);
+          const isLoadingLike = loadingLikes.has(wish.id);
+          
+          // Crear clave única combinando ID con contexto de la sección
+          const uniqueKey = sectionTitle ? `${sectionTitle}-${wish.id}-${index}` : `${wish.id}-${index}`;
+
+          return (
+            <div
+              key={uniqueKey}
+              className={`bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-out card-hover transform border border-gray-200/50 mb-6 ${
+                isCelebrating ? "scale-105" : ""
+              }`}
+            >
+            {/* Image Carousel Section */}
+            <div className="relative bg-white group">
+              <div className="relative overflow-hidden">
+                <Image
+                  alt={wish.title}
+                  className="w-full h-60 object-contain bg-white cursor-pointer transition-transform hover:scale-105"
+                  src={wish.images[currentImageIndex[wish.id] || 0]}
+                  width={400}
+                  height={240}
+                  onClick={() =>
+                    openModal(wish.images[currentImageIndex[wish.id] || 0])
+                  }
+                />
+
+                {/* Carousel Navigation */}
+                {wish.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => prevImage(wish.id, wish.images.length)}
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
+                    >
+                      <span className="material-icons text-lg">
+                        chevron_left
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => nextImage(wish.id, wish.images.length)}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
+                    >
+                      <span className="material-icons text-lg">
+                        chevron_right
+                      </span>
+                    </button>
+
+                    {/* Image Indicators */}
+                    <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
+                      {wish.images.map((_: string, index: number) => (
+                        <button
+                          key={index}
+                          onClick={() =>
+                            setCurrentImageIndex((prev) => ({
+                              ...prev,
+                              [wish.id]: index,
+                            }))
+                          }
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            (currentImageIndex[wish.id] || 0) === index
+                              ? "bg-white"
+                              : "bg-white/50"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Likes Counter - Top Right */}
+              <div className="absolute top-3 right-3">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleLike(wish.id);
+                  }}
+                  disabled={isLoadingLike}
+                  className={`bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 
+                    transition-all duration-300 ease-out hover:bg-black/70 hover:scale-110 active:scale-95
+                    ${isLoadingLike ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
+                    ${isCelebrating ? 'heart-celebrate' : ''}
+                    focus:outline-none focus:ring-2 focus:ring-pink-400/50`}
+                  aria-label={wish.isLiked ? "Quitar like" : "Dar like"}
+                >
+                  <span className={`material-icons text-sm transition-all duration-200
+                    ${wish.isLiked ? 'text-pink-400' : 'text-pink-300'}`}>
+                    {isLoadingLike ? "hourglass_empty" : "favorite"}
+                  </span>
+                  <span className="text-white text-sm font-semibold likes-counter">
+                    {wish.likes}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Content Section */}
+            <div className="p-5">
+              <div className="mb-2">
+                <Badge
+                  variant="outline"
+                  className="text-xs text-gray-600 mb-2"
+                >
+                  {wish.category}
+                </Badge>
+              </div>
+
+              <h2
+                className="text-lg font-semibold text-gray-900 mb-2 leading-tight"
+                title={wish.title}
+              >
+                {wish.title}
+              </h2>
+
+              {wish.description && (
+                <p className="text-sm text-gray-700 mb-3">
+                  {wish.description}
+                </p>
+              )}
+
+              {/* Price and Time Section */}
+              <div className="flex justify-between items-center mb-4">
+                <div className="text-gray-900">
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-bold text-purple-600">
+                      ${wish.priceUSD} USD
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      ≈ ${wish.priceARS.toLocaleString()} ARS
+                    </span>
+                  </div>
+                </div>
+
+                <LikeButton
+                  id={wish.id}
+                  isLiked={wish.isLiked}
+                  onLike={toggleLike}
+                  isLoading={isLoadingLike}
+                  isCelebrating={isCelebrating}
+                  variant="heart"
+                />
+              </div>
+
+              {/* Support Button */}
+              <LikeButton
+                id={wish.id}
+                isLiked={wish.isLiked}
+                onLike={toggleLike}
+                isLoading={isLoadingLike}
+                isCelebrating={isCelebrating}
+                variant="button"
+              />
+            </div>
+          </div>
+          );
+        })}
+      </>
+    );
   };
 
   return (
@@ -530,6 +727,18 @@ export default function HomePage() {
 
         {/* Main Content */}
         <main className="p-4 space-y-6 relative z-0">
+          {/* Gamified Search Component */}
+          <GameifiedSearch onFiltersChange={setSearchFilters} />
+
+          {/* Gamified Suggestions removed per request */}
+
+          {/* Product Stats */}
+          <ProductStats 
+            totalProducts={products.length}
+            selectedFilters={searchFilters}
+            isLoading={isLoadingProducts}
+          />
+
           {/* Wishes Header Banner */}
           <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl p-6 text-white overflow-hidden">
             {/* Background Pattern */}
@@ -597,161 +806,59 @@ export default function HomePage() {
           {isLoading ? (
             <LikesLoadingSkeleton />
           ) : (
-            wishes.map((wish) => {
-              const isCelebrating = celebratingItems.has(wish.id);
-              const isLoadingLike = loadingLikes.has(wish.id);
-
-              return (
-                <div
-                  key={wish.id}
-                  className={`bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-out card-hover transform border border-gray-200/50 ${
-                    isCelebrating ? "scale-105" : ""
-                  }`}
-                >
-                {/* Image Carousel Section */}
-                <div className="relative bg-white group">
-                  <div className="relative overflow-hidden">
-                    <Image
-                      alt={wish.title}
-                      className="w-full h-60 object-contain bg-white cursor-pointer transition-transform hover:scale-105"
-                      src={wish.images[currentImageIndex[wish.id] || 0]}
-                      width={400}
-                      height={240}
-                      onClick={() =>
-                        openModal(wish.images[currentImageIndex[wish.id] || 0])
-                      }
-                    />
-
-                    {/* Carousel Navigation */}
-                    {wish.images.length > 1 && (
-                      <>
-                        <button
-                          onClick={() => prevImage(wish.id, wish.images.length)}
-                          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
-                        >
-                          <span className="material-icons text-lg">
-                            chevron_left
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => nextImage(wish.id, wish.images.length)}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all carousel-nav shadow-lg"
-                        >
-                          <span className="material-icons text-lg">
-                            chevron_right
-                          </span>
-                        </button>
-
-                        {/* Image Indicators */}
-                        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
-                          {wish.images.map((_: string, index: number) => (
-                            <button
-                              key={index}
-                              onClick={() =>
-                                setCurrentImageIndex((prev) => ({
-                                  ...prev,
-                                  [wish.id]: index,
-                                }))
-                              }
-                              className={`w-2 h-2 rounded-full transition-colors ${
-                                (currentImageIndex[wish.id] || 0) === index
-                                  ? "bg-white"
-                                  : "bg-white/50"
-                              }`}
-                            />
-                          ))}
+            <div>
+              {/* Productos Exactos */}
+              {exactWishes.length > 0 && (
+                <div>
+                  {searchFilters.tags && searchFilters.tags.length > 0 && (
+                    <div className="mb-6">
+                      <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 border border-purple-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-bold">✓</span>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-purple-800">
+                              Resultados exactos ({exactCount})
+                            </h3>
+                            <p className="text-sm text-purple-600">
+                              {searchFilters.tags.join(' + ')}
+                              {searchFilters.category && searchFilters.category !== 'ALL' && ` + ${searchFilters.category}`}
+                            </p>
+                          </div>
                         </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Likes Counter - Top Right */}
-                  <div className="absolute top-3 right-3">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleLike(wish.id);
-                      }}
-                      disabled={isLoadingLike}
-                      className={`bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 
-                        transition-all duration-300 ease-out hover:bg-black/70 hover:scale-110 active:scale-95
-                        ${isLoadingLike ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
-                        ${isCelebrating ? 'heart-celebrate' : ''}
-                        focus:outline-none focus:ring-2 focus:ring-pink-400/50`}
-                      aria-label={wish.isLiked ? "Quitar like" : "Dar like"}
-                    >
-                      <span className={`material-icons text-sm transition-all duration-200
-                        ${wish.isLiked ? 'text-pink-400' : 'text-pink-300'}`}>
-                        {isLoadingLike ? "hourglass_empty" : "favorite"}
-                      </span>
-                      <span className="text-white text-sm font-semibold likes-counter">
-                        {wish.likes}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <div className="p-5">
-                  <div className="mb-2">
-                    <Badge
-                      variant="outline"
-                      className="text-xs text-gray-600 mb-2"
-                    >
-                      {wish.category}
-                    </Badge>
-                  </div>
-
-                  <h2
-                    className="text-lg font-semibold text-gray-900 mb-2 leading-tight"
-                    title={wish.title}
-                  >
-                    {wish.title}
-                  </h2>
-
-                  {wish.description && (
-                    <p className="text-sm text-gray-700 mb-3">
-                      {wish.description}
-                    </p>
-                  )}
-
-                  {/* Price and Time Section */}
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="text-gray-900">
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg font-bold text-purple-600">
-                          ${wish.priceUSD} USD
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          ≈ ${wish.priceARS.toLocaleString()} ARS
-                        </span>
                       </div>
                     </div>
-
-                    <LikeButton
-                      id={wish.id}
-                      isLiked={wish.isLiked}
-                      onLike={toggleLike}
-                      isLoading={isLoadingLike}
-                      isCelebrating={isCelebrating}
-                      variant="heart"
-                    />
-                  </div>
-
-                  {/* Support Button */}
-                  <LikeButton
-                    id={wish.id}
-                    isLiked={wish.isLiked}
-                    onLike={toggleLike}
-                    isLoading={isLoadingLike}
-                    isCelebrating={isCelebrating}
-                    variant="button"
-                  />
+                  )}
+                  {renderProductList(exactWishes, "exact")}
                 </div>
-              </div>
-            );
-          })
+              )}
+
+              {/* Productos Relacionados */}
+              {relatedWishes.length > 0 && (
+                <div>
+                  <div className="mb-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-sm font-bold">~</span>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-blue-800">
+                            Productos relacionados ({relatedCount})
+                          </h3>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {renderProductList(relatedWishes, "related")}
+                </div>
+              )}
+
+              {/* Si no hay filtros, mostrar todos los productos sin secciones */}
+              {!searchFilters.tags && !searchFilters.category && 
+                renderProductList(wishes, "all")}
+            </div>
           )}
 
           {/* Community Info Footer */}

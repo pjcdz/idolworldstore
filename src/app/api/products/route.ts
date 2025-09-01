@@ -5,7 +5,19 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const tags = searchParams.get('tags')?.split(',').filter(Boolean);
+    const tagsParam = searchParams.get('tags');
+    let tags: string[] = [];
+    
+    if (tagsParam) {
+      try {
+        // Intentar parsear como JSON primero
+        tags = JSON.parse(tagsParam);
+      } catch {
+        // Si falla, usar como string separado por comas
+        tags = tagsParam.split(',').filter(Boolean);
+      }
+    }
+    
     const minLikes = searchParams.get('min_likes') ? parseInt(searchParams.get('min_likes')!) : undefined;
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
@@ -17,11 +29,12 @@ export async function GET(request: Request) {
       .eq('is_active', true);
 
     // Aplicar filtros
-    if (category) {
+    if (category && category !== 'ALL') {
       query = query.eq('category', category);
     }
     if (tags && tags.length > 0) {
-      query = query.overlaps('tags', tags);
+      // Usar contains en lugar de overlaps para AND logic
+      query = query.contains('tags', tags);
     }
     if (minLikes !== undefined) {
       query = query.gte('likes', minLikes);
