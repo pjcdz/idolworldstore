@@ -20,6 +20,11 @@ interface CategoryCount {
   count: number;
 }
 
+// Helper function para manejar singular/plural
+const formatProductCount = (count: number) => {
+  return count === 1 ? `${count} producto` : `${count} productos`;
+};
+
 interface GameifiedSearchProps {
   onFiltersChange: (filters: {
     group?: string;
@@ -321,7 +326,7 @@ export default function GameifiedSearch({ onFiltersChange }: GameifiedSearchProp
                     {group.group_name === 'TOMORROW X TOGETHER' ? 'TXT' : group.group_name}
                   </span>
                   <Badge variant="secondary" className="text-xs">
-                    {group.product_count} productos
+                    {formatProductCount(group.product_count)}
                   </Badge>
                 </Button>
               ))
@@ -356,7 +361,7 @@ export default function GameifiedSearch({ onFiltersChange }: GameifiedSearchProp
                       {member.member_name === 'ALL' ? '🌟 Todos' : member.member_name}
                     </span>
                     <Badge variant="secondary" className="text-xs">
-                      {member.product_count} productos
+                      {formatProductCount(member.product_count)}
                     </Badge>
                   </Button>
                 ))
@@ -408,7 +413,7 @@ export default function GameifiedSearch({ onFiltersChange }: GameifiedSearchProp
                       {cat.category === 'ALL' ? 'Todos' : cat.category}
                     </span>
                     <Badge variant="secondary" className="text-xs">
-                      {cat.count} productos
+                      {formatProductCount(cat.count)}
                     </Badge>
                   </Button>
                 ))
