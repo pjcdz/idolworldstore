@@ -48,13 +48,13 @@ export function LikeButton({
         ) : isLiked ? (
           <>
             <span className="mr-2">💜</span>
-            Ya apoyas este deseo
+            Ya apoyas este wish
             <span className="ml-2">✨</span>
           </>
         ) : (
           <>
             <span className="mr-2">🙌</span>
-            Apoyar este deseo
+            Apoyar este wish
             <span className="ml-2">🌟</span>
           </>
         )}
@@ -77,7 +77,7 @@ export function LikeButton({
         p-2 rounded-full hover:bg-gray-100 transition-all duration-200 ease-out transform 
         hover:scale-110 active:scale-125 relative
         disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 ${className}`}
-      aria-label={isLiked ? "Quitar apoyo de este deseo" : "Apoyar este deseo"}
+      aria-label={isLiked ? "Quitar apoyo de este wish" : "Apoyar este wish"}
     >
       <span className="material-icons text-2xl align-middle">
         {isLoading ? "hourglass_empty" : isLiked ? "favorite" : "favorite_border"}

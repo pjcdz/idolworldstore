@@ -1,120 +1,76 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/header";
 import { LikeButton } from "@/components/like-button";
 import { LikesLoadingSkeleton } from "@/components/likes-loading-skeleton";
 import { MobileOnlyNotice } from "@/components/mobile-only-notice";
+import { ExchangeRateIndicator } from "@/components/exchange-rate-indicator";
 import { useLikes } from "@/hooks/use-likes";
 import { useMobile } from "@/hooks/use-mobile";
+import { useProducts, type Product } from "@/hooks/use-products";
+import { useExchangeRate } from "@/hooks/use-exchange-rate";
 
-interface Wish {
-  id: string;
-  title: string;
-  requester: string;
-  images: string[];
-  likes: number;
-  category: string;
-  isLiked: boolean;
-  priceUSD: number;
-  priceARS: number;
-  description?: string;
-  isHot?: boolean;
-  isRecent?: boolean;
+// Extender la interfaz Product para compatibilidad con el componente existente
+interface ProductWithLikes extends Product {
+  priceUSD: number; // Alias para compatibilidad
+  priceARS: number; // Calculado dinámicamente
+  isLiked: boolean; // Estado local del usuario
 }
 
-const mockWishes: Wish[] = [
-  {
-    id: "1",
-    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Canvas Ver.]",
-    requester: "OnceCollector",
-    images: [
-      "https://m.media-amazon.com/images/I/51XKuit1M+L._AC_SL1000_.jpg",
-      "https://m.media-amazon.com/images/I/61avyfCFixL._AC_SL1440_.jpg",
-    ],
-    likes: 0,
-    category: "Albums",
-    isLiked: false,
-    priceUSD: 60,
-    priceARS: 80561,
-    description:
-      "1st Mini Album de Chaeyoung (Canvas Version). Edición coleccionable para fans de TWICE.",
-  },
-  {
-    id: "2",
-    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Standard Ver. - Murmur]",
-    requester: "ChaeWish",
-    images: [
-      "https://m.media-amazon.com/images/I/31k7IBkiKVL._AC_SL1000_.jpg",
-      "https://m.media-amazon.com/images/I/51DpvD5qqDL._AC_SL1000_.jpg",
-    ],
-    likes: 0,
-    category: "Albums",
-    isLiked: false,
-    priceUSD: 70,
-    priceARS: 93988,
-    description:
-      "TWICE Chaeyoung 1st solo album, versión estándar Murmur. Incluye photobook y contenido exclusivo.",
-  },
-  {
-    id: "3",
-    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Sparkle POB JYP]",
-    requester: "POBHunter",
-    images: [
-      "https://m.media-amazon.com/images/I/31BNX6OJNHL._AC_.jpg",
-      "https://m.media-amazon.com/images/I/5144VbP7VhL._AC_SL1024_.jpg",
-    ],
-    likes: 0,
-    category: "Albums",
-    isLiked: false,
-    priceUSD: 44,
-    priceARS: 59078,
-    description:
-      "[EXCLUSIVE POB] Sparkle Version con CD + Pre-Order Gift oficial de JYP Fans Shop.",
-  },
-  {
-    id: "4",
-    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Sparkle Ver. WithMuu]",
-    requester: "WithMuuFan",
-    images: [
-      "https://m.media-amazon.com/images/I/61ThxtMcVYL._AC_SL1500_.jpg",
-      "https://m.media-amazon.com/images/I/71nMZ7qil3L._AC_SL1500_.jpg",
-      "https://m.media-amazon.com/images/I/71jwOsx6yvL._AC_SL1500_.jpg",
-    ],
-    likes: 0,
-    category: "Albums",
-    isLiked: false,
-    priceUSD: 50,
-    priceARS: 67134,
-    description:
-      "[WITHMUU POB Exclusive] Digipack Sparkle Version. Edición exclusiva y sellada.",
-  },
-  {
-    id: "5",
-    title: "CHAEYOUNG - LIL FANTASY Vol.1 [Avocado Pit Vinyl]",
-    requester: "VinylOnce",
-    images: ["https://m.media-amazon.com/images/I/516wNdo-8hL._SL1500_.jpg"],
-    likes: 0,
-    category: "Vinyl",
-    isLiked: false,
-    priceUSD: 60,
-    priceARS: 80561,
-    description:
-      "Vinilo edición especial Avocado Pit del primer mini álbum de Chaeyoung.",
-  },
-];
-
 export default function HomePage() {
+  // Obtener productos desde la base de datos
   const { 
-    items: wishes, 
+    products, 
+    isLoading: isLoadingProducts, 
+    error: productsError,
+    refetch: refetchProducts,
+    incrementLike,
+    decrementLike
+  } = useProducts();
+
+  // Obtener tipo de cambio USD/ARS
+  const { convertUsdToArs, isLoading: isLoadingRate } = useExchangeRate();
+
+  // Hook de likes simplificado - solo para estado de UI
+  const { 
     celebratingItems, 
     loadingLikes,
-    isLoading, 
-    toggleLike, 
-    totalLikes 
-  } = useLikes(mockWishes);
+    toggleLike: handleToggleLike, 
+    userLikes
+  } = useLikes();
+
+  // Transformar productos con estado de likes y precios calculados
+  const wishes: ProductWithLikes[] = products.map(product => ({
+    ...product,
+    isLiked: userLikes.has(product.id), // Estado local del usuario
+    priceUSD: product.price_usd, // Alias para compatibilidad
+    priceARS: convertUsdToArs(product.price_usd), // Calculado dinámicamente
+  }));
+
+  // Función de toggle optimizada que actualiza inmediatamente
+  const toggleLike = async (id: string) => {
+    const product = wishes.find(w => w.id === id);
+    if (!product) return;
+
+    try {
+      if (product.isLiked) {
+        await decrementLike(id);
+      } else {
+        await incrementLike(id);
+      }
+      
+      // Llamar al handler de UI para animaciones
+      await handleToggleLike(id);
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+  const totalLikes = wishes.reduce((sum, wish) => sum + wish.likes, 0);
   
   const { isMobile, isLoading: isMobileLoading } = useMobile();
   const [showMobileNotice, setShowMobileNotice] = useState(false);
@@ -130,6 +86,45 @@ export default function HomePage() {
       setShowMobileNotice(true);
     }
   }, [isMobile, isMobileLoading]);
+
+  // Handle keyboard navigation for modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (modalImage && event.key === "Escape") {
+        closeModal();
+      }
+    };
+
+    if (modalImage) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [modalImage]);
+
+  // Si hay error cargando productos, mostrar mensaje
+  if (productsError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center p-8">
+          <div className="text-6xl mb-4">😞</div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Error al cargar productos
+          </h2>
+          <p className="text-gray-600 mb-4">{productsError}</p>
+          <Button onClick={refetchProducts}>
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const isLoading = isLoadingProducts || isLoadingRate;
 
   const nextImage = (wishId: string, totalImages: number) => {
     setCurrentImageIndex((prev) => ({
@@ -152,25 +147,6 @@ export default function HomePage() {
   const closeModal = () => {
     setModalImage(null);
   };
-
-  // Handle keyboard navigation for modal
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (modalImage && event.key === "Escape") {
-        closeModal();
-      }
-    };
-
-    if (modalImage) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
-    };
-  }, [modalImage]);
 
   const createWish = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -635,10 +611,12 @@ export default function HomePage() {
                 {/* Image Carousel Section */}
                 <div className="relative bg-white group">
                   <div className="relative overflow-hidden">
-                    <img
+                    <Image
                       alt={wish.title}
                       className="w-full h-60 object-contain bg-white cursor-pointer transition-transform hover:scale-105"
                       src={wish.images[currentImageIndex[wish.id] || 0]}
+                      width={400}
+                      height={240}
                       onClick={() =>
                         openModal(wish.images[currentImageIndex[wish.id] || 0])
                       }
@@ -666,7 +644,7 @@ export default function HomePage() {
 
                         {/* Image Indicators */}
                         <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
-                          {wish.images.map((_, index) => (
+                          {wish.images.map((_: string, index: number) => (
                             <button
                               key={index}
                               onClick={() =>
@@ -710,24 +688,6 @@ export default function HomePage() {
                       <span className="text-white text-sm font-semibold likes-counter">
                         {wish.likes}
                       </span>
-                      
-                      {/* Floating hearts effect for counter */}
-                      {isCelebrating && wish.isLiked && (
-                        <div className="floating-hearts">
-                          {[...Array(3)].map((_, i) => (
-                            <div
-                              key={i}
-                              className="floating-heart"
-                              style={{
-                                left: `${-5 + i * 8}px`,
-                                animationDelay: `${i * 0.15}s`,
-                              }}
-                            >
-                              💜
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </button>
                   </div>
                 </div>
@@ -801,10 +761,18 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 ¡Más deseos, más posibilidades!
               </h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-600 leading-relaxed mb-3">
                 Los deseos con más likes tienen más posibilidades de convertirse
                 en Group Orders. ¡Apoya los deseos que más te gusten! 💜
               </p>
+              
+              {/* Exchange Rate Indicator */}
+              <div className="flex justify-center">
+                <ExchangeRateIndicator 
+                  showDetails={true}
+                  className="bg-white/50 px-3 py-1.5 rounded-lg border border-purple-200/30"
+                />
+              </div>
             </div>
           </div>
         </main>
@@ -822,10 +790,12 @@ export default function HomePage() {
               >
                 <span className="material-icons text-xl">close</span>
               </button>
-              <img
+              <Image
                 src={modalImage}
                 alt="Imagen ampliada"
                 className="max-w-full max-h-screen object-contain rounded-lg shadow-2xl"
+                width={1200}
+                height={800}
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
