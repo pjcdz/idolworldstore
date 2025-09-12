@@ -128,7 +128,7 @@ export default function HomePage() {
 
     return (
       <>
-        {sectionTitle && sectionTitle !== 'exact' && sectionTitle !== 'related' && (
+        {sectionTitle && sectionTitle !== 'exact' && (
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
             <h3 className="text-lg font-semibold text-gray-700 px-4 bg-gray-50 rounded-full">
@@ -288,17 +288,15 @@ export default function HomePage() {
 
             {/* Contact WhatsApp Button */}
             <div className="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 
-              text-white font-bold py-4 px-4 sm:px-6 rounded-2xl transition-all duration-300 ease-out 
+              text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 ease-out 
               transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-white/20
               focus:outline-none focus:ring-2 focus:ring-white/50 text-center">
-              <div className="mb-3 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-                <div className="flex items-center gap-1">
-                  <span className="text-lg sm:text-xl">💬</span>
-                  <span className="text-base sm:text-lg font-bold">¡Contáctanos por WhatsApp!</span>
-                  <span className="text-lg sm:text-xl">📱</span>
-                </div>
+              <div className="mb-2">
+                <span className="text-xl">💬</span>
+                <span className="ml-2 text-lg">¡Contáctanos por WhatsApp!</span>
+                <span className="ml-2 text-xl">📱</span>
               </div>
-              <p className="text-purple-100 text-xs sm:text-sm leading-relaxed px-2">
+              <p className="text-purple-100 text-sm">
                 Haz clic en cualquier producto para consultar disponibilidad
               </p>
             </div>
@@ -390,10 +388,11 @@ export default function HomePage() {
       {/* Image Modal */}
       {modalImage && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
           onClick={closeModal}
+          style={{ animation: "modalFadeIn 0.3s ease-out" }}
         >
-          <div className="relative max-w-4xl max-h-screen m-4 animate-in zoom-in-95 duration-300">
+          <div className="relative max-w-4xl max-h-screen m-4">
             <button
               onClick={closeModal}
               className="absolute top-4 right-4 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all shadow-lg hover:scale-110"
@@ -417,6 +416,19 @@ export default function HomePage() {
         isVisible={showMobileNotice}
         onClose={() => setShowMobileNotice(false)}
       />
+
+      <style jsx>{`
+        @keyframes modalFadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }

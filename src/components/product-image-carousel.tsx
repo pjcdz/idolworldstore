@@ -177,7 +177,7 @@ export default function ProductImageCarousel({
       )}
 
       {images.length > 1 && (
-        <div className="absolute top-3 right-3 bg-black/80 text-white text-sm font-bold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-lg border border-white/20">
+        <div className="absolute top-3 left-3 bg-black/80 text-white text-sm font-bold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-lg border border-white/20">
           {currentIndex + 1}/{images.length}
         </div>
       )}
