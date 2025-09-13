@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useCachedMetadata, useCachedGroupMembers } from '@/hooks/use-cached-metadata';
-import { Product } from '@/hooks/use-products';
 
 interface Group {
   group_name: string;
@@ -34,21 +32,98 @@ interface GameifiedSearchProps {
     category?: string;
     tags?: string[];
   }) => void;
-  products?: Product[]; // Productos para usar como cache
 }
 
-export default function GameifiedSearch({ onFiltersChange, products = [] }: GameifiedSearchProps) {
+export default function GameifiedSearch({ onFiltersChange }: GameifiedSearchProps) {
   const [step, setStep] = useState<'group' | 'member' | 'category' | 'results'>('group');
   const [selectedGroup, setSelectedGroup] = useState<string>('');
   const [selectedMember, setSelectedMember] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-
-  // Usar cache en lugar de hacer peticiones HTTP
-  const { groups, categories, isReady } = useCachedMetadata(products);
-  const groupMembers = useCachedGroupMembers(products, selectedGroup);
-
-  // Estado para tracking de loading (ya no necesario pero lo mantenemos para la UI)
+  
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [categories, setCategories] = useState<CategoryCount[]>([]);
+  
   const [loading, setLoading] = useState(false);
+
+  // Cargar grupos disponibles
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const fetchGroups = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/groups?include_count=true');
+      const data = await response.json();
+      setGroups(data.groups || []);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMembers = async (groupName: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/groups/${encodeURIComponent(groupName)}`);
+      const data = await response.json();
+      setMembers(data.members || []);
+    } catch (error) {
+      console.error('Error fetching members:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async (groupName: string, memberName?: string) => {
+    setLoading(true);
+    try {
+      // Construir los tags para el filtro
+      const tags = [groupName];
+      if (memberName && memberName !== 'ALL') {
+        tags.push(memberName);
+      }
+
+      // Obtener productos que coincidan con los filtros
+      const params = new URLSearchParams({
+        tags: JSON.stringify(tags),
+        include_categories: 'true'
+      });
+
+      const response = await fetch(`/api/products?${params.toString()}`);
+      const data = await response.json();
+      
+      // Contar productos por categoría
+      const categoryCounts = new Map();
+      let totalProducts = 0;
+
+      data.products?.forEach((product: { category?: string }) => {
+        const category = product.category || 'Other';
+        categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
+        totalProducts++;
+      });
+
+      // Convertir a array y agregar "Todos"
+      const categoryArray = Array.from(categoryCounts.entries()).map(([category, count]) => ({
+        category,
+        count
+      }));
+
+      // Agregar opción "Todos" al principio
+      if (totalProducts > 0) {
+        categoryArray.unshift({ category: 'ALL', count: totalProducts });
+      }
+
+      setCategories(categoryArray);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGroupSelect = (groupName: string) => {
     setSelectedGroup(groupName);
@@ -66,14 +141,15 @@ export default function GameifiedSearch({ onFiltersChange, products = [] }: Game
     
     onFiltersChange(filters);
     
-    // Ir al paso de miembros (ya no necesitamos cargar, todo está en cache)
+    // Continuar con la carga de miembros para permitir navegación posterior
+    fetchMembers(groupName);
     setStep('member');
   };
 
   const handleMemberSelect = (memberName: string) => {
     setSelectedMember(memberName);
     setSelectedCategory('');
-    // Ya no necesitamos fetchCategories, todo está en cache
+    fetchCategories(selectedGroup, memberName);
     setStep('category');
   };
 
@@ -124,7 +200,7 @@ export default function GameifiedSearch({ onFiltersChange, products = [] }: Game
     setStep('member');
     setSelectedMember('');
     setSelectedCategory('');
-    // Ya no necesitamos fetchMembers, todo está en cache
+    fetchMembers(selectedGroup);
     onFiltersChange({});
   };
 
@@ -234,9 +310,9 @@ export default function GameifiedSearch({ onFiltersChange, products = [] }: Game
         {/* Paso 1: Seleccionar Grupo */}
         {step === 'group' && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {!isReady ? (
+            {loading ? (
               <div className="col-span-full text-center py-8">
-                Preparando grupos disponibles...
+                Cargando grupos disponibles...
               </div>
             ) : groups.length > 0 ? (
               groups.map((group) => (
@@ -269,12 +345,12 @@ export default function GameifiedSearch({ onFiltersChange, products = [] }: Game
               <h3 className="text-lg font-semibold mb-2">Miembros de {selectedGroup} disponibles:</h3>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {!isReady ? (
+              {loading ? (
                 <div className="col-span-full text-center py-8">
-                  Preparando miembros...
+                  Cargando miembros...
                 </div>
-              ) : groupMembers.length > 0 ? (
-                groupMembers.map((member) => (
+              ) : members.length > 0 ? (
+                members.map((member) => (
                   <Button
                     key={member.member_name}
                     variant={member.member_name === 'ALL' ? 'default' : 'outline'}

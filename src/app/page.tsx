@@ -496,7 +496,7 @@ export default function HomePage() {
             </div>
             
             {/* Componente de búsqueda con diseño original */}
-            <GameifiedSearch onFiltersChange={setSearchFilters} products={products} />
+            <GameifiedSearch onFiltersChange={setSearchFilters} />
           </div>
         </div>
       )}
