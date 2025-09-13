@@ -324,7 +324,7 @@ export default function AdvancedFilters({ onFiltersChange, currentFilters }: Adv
                 <Label htmlFor="sortBy">Ordenar por</Label>
                 <Select
                   value={currentFilters.sortBy}
-                  onValueChange={(value: any) => updateFilters({ sortBy: value })}
+                  onValueChange={(value: 'created_at' | 'updated_at' | 'likes' | 'price_usd' | 'title') => updateFilters({ sortBy: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />

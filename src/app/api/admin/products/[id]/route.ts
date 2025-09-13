@@ -19,8 +19,10 @@ function verifyAdminToken(request: Request): boolean {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  
   if (!verifyAdminToken(request)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
@@ -29,7 +31,7 @@ export async function GET(
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .single();
 
     if (error) {
@@ -53,8 +55,10 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  
   if (!verifyAdminToken(request)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
@@ -63,7 +67,7 @@ export async function PUT(
     const updates = await request.json();
     
     // Preparar los datos a actualizar
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString()
     };
 
@@ -79,7 +83,7 @@ export async function PUT(
     const { data, error } = await supabase
       .from('products')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .select()
       .single();
 
@@ -104,8 +108,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  
   if (!verifyAdminToken(request)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
@@ -118,7 +124,7 @@ export async function DELETE(
         is_active: false,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .select()
       .single();
 

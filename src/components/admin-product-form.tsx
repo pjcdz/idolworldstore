@@ -38,24 +38,9 @@ const CATEGORIES = [
 
 const KPOP_GROUPS = [
   'TWICE', 'STRAY KIDS', 'TOMORROW X TOGETHER', 'TXT',
-  'BLACKPINK', 'NEWJEANS', 'ITZY', 'AESPA', 'IVE', 
-  '(G)I-DLE', 'LE SSERAFIM', 'NMIXX'
+  'BLACKPINK', 'aespa', 'ITZY', '(G)I-DLE', 'NewJeans', 
+  'IVE', 'LE SSERAFIM', 'SEVENTEEN'
 ];
-
-const GROUP_MEMBERS = {
-  'TWICE': ['NAYEON', 'JEONGYEON', 'MOMO', 'SANA', 'JIHYO', 'MINA', 'DAHYUN', 'CHAEYOUNG', 'TZUYU'],
-  'STRAY KIDS': ['BANG CHAN', 'LEE KNOW', 'CHANGBIN', 'HYUNJIN', 'HAN', 'FELIX', 'SEUNGMIN', 'I.N'],
-  'TXT': ['YEONJUN', 'SOOBIN', 'BEOMGYU', 'TAEHYUN', 'HUENINGKAI'],
-  'TOMORROW X TOGETHER': ['YEONJUN', 'SOOBIN', 'BEOMGYU', 'TAEHYUN', 'HUENINGKAI'],
-  'BLACKPINK': ['JISOO', 'JENNIE', 'ROSÉ', 'LISA'],
-  'NEWJEANS': ['MINJI', 'HANNI', 'DANIELLE', 'HAERIN', 'HYEIN'],
-  'ITZY': ['YEJI', 'LIA', 'RYUJIN', 'CHAERYEONG', 'YUNA'],
-  'AESPA': ['KARINA', 'WINTER', 'GISELLE', 'NINGNING'],
-  'IVE': ['YUJIN', 'GAEUL', 'REI', 'WONYOUNG', 'LIZ', 'LEESEO'],
-  '(G)I-DLE': ['MIYEON', 'MINNIE', 'SOYEON', 'YUQI', 'SHUHUA'],
-  'LE SSERAFIM': ['SAKURA', 'CHAEWON', 'YUNJIN', 'KAZUHA', 'EUNCHAE'],
-  'NMIXX': ['LILY', 'HAEWON', 'SULLYOON', 'JINNI', 'BAE', 'JIWOO', 'KYUJIN']
-};
 
 const COMMON_TAGS = [
   'Official', 'Limited Edition', 'Exclusive', 'Set', 'Version 2', 'Standard',
@@ -83,7 +68,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
     }
   }, [product]);
 
-  const handleInputChange = (field: keyof Product, value: any) => {
+  const handleInputChange = (field: keyof Product, value: string | number | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

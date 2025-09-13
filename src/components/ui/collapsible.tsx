@@ -60,12 +60,12 @@ const CollapsibleTrigger = React.forwardRef<
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       ...props,
-      ref,
+      ...(ref && { ref }),
       onClick: (e: React.MouseEvent) => {
         onClick?.()
         children.props.onClick?.(e)
       }
-    })
+    } as Record<string, unknown>)
   }
 
   return (

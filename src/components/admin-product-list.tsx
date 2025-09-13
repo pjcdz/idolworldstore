@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Edit, Trash2, Eye, Heart, DollarSign, ExternalLink, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import ProductForm from '@/components/admin-product-form';
@@ -91,11 +90,7 @@ export default function ProductList({
     </TableHead>
   );
 
-  useEffect(() => {
-    fetchProducts();
-  }, [filters, currentPage]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError('');
 
@@ -136,7 +131,11 @@ export default function ProductList({
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, currentPage]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {

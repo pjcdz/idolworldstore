@@ -19,8 +19,10 @@ function verifyAdminToken(request: Request): boolean {
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  
   if (!verifyAdminToken(request)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
@@ -33,7 +35,7 @@ export async function POST(
         is_active: true,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .select()
       .single();
 

@@ -1,16 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Package, Plus, Search, Filter } from 'lucide-react';
+import { LogOut, Package } from 'lucide-react';
 import ProductList from '@/components/admin-product-list';
 import ProductForm from '@/components/admin-product-form';
 import AdminStats from '@/components/admin-stats';
 import AdvancedFilters, { ProductFilters } from '@/components/admin-advanced-filters';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface AdminDashboardProps {
   onLogout: () => void;

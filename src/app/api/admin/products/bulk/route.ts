@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    let updateData: any = {
+    const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString()
     };
 

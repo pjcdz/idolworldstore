@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,88 +85,24 @@ export default function HomePage() {
       }
     };
 
-    if (modalData) {
+    if (modalData && typeof window !== 'undefined') {
       document.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      if (typeof window !== 'undefined') {
+        document.removeEventListener("keydown", handleKeyDown);
+        document.body.style.overflow = "unset";
+      }
     };
   }, [modalData]);
-
-  // Si hay error cargando productos, mostrar mensaje
-  if (productsError) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center p-8">
-          <div className="text-6xl mb-4">😞</div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Error al cargar productos
-          </h2>
-          <p className="text-gray-600 mb-4">{productsError}</p>
-          <Button onClick={refetchProducts}>
-            Reintentar
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const isLoading = isLoadingProducts || isLoadingRate;
-
-  const openModal = (imageUrl: string, allImages?: string[], productTitle?: string) => {
-    if (allImages && allImages.length > 1) {
-      const currentIndex = allImages.findIndex(img => img === imageUrl);
-      setModalData({
-        images: allImages,
-        currentIndex: currentIndex >= 0 ? currentIndex : 0,
-        productTitle: productTitle || ''
-      });
-    } else {
-      setModalData({
-        images: [imageUrl],
-        currentIndex: 0,
-        productTitle: productTitle || ''
-      });
-    }
-  };
-
-  const closeModal = () => {
-    setModalData(null);
-  };
-
-  const navigateModal = (direction: number) => {
-    if (!modalData) return;
-    
-    const newIndex = modalData.currentIndex + direction;
-    if (newIndex >= 0 && newIndex < modalData.images.length) {
-      setModalData({
-        ...modalData,
-        currentIndex: newIndex
-      });
-    }
-  };
-
-  // Función para manejar ambos botones (filtros y búsqueda) - abren/cierran el GameifiedSearch fixed - Solo mobile
-  const handleSearchToggle = () => {
-    // Solo funciona en mobile
-    if (window.innerWidth < 1024) {
-      setShowSearchFixed(!showSearchFixed);
-    }
-  };
-
-  // Función para cerrar el componente fixed
-  const handleCloseFixed = () => {
-    setShowSearchFixed(false);
-  };
 
   // Event listener global para abrir el componente al hacer click en cualquier parte - Solo mobile
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
       // Solo funciona en mobile
-      if (window.innerWidth >= 1024) {
+      if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
         return;
       }
 
@@ -192,10 +128,14 @@ export default function HomePage() {
       setShowSearchFixed(true);
     };
 
-    document.addEventListener('click', handleGlobalClick);
+    if (typeof window !== 'undefined') {
+      document.addEventListener('click', handleGlobalClick);
+    }
     
     return () => {
-      document.removeEventListener('click', handleGlobalClick);
+      if (typeof window !== 'undefined') {
+        document.removeEventListener('click', handleGlobalClick);
+      }
     };
   }, [showSearchFixed]);
 
@@ -203,7 +143,7 @@ export default function HomePage() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Solo funciona en mobile
-      if (window.innerWidth >= 1024) {
+      if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
         return;
       }
       
@@ -212,14 +152,59 @@ export default function HomePage() {
       }
     };
 
-    if (showSearchFixed) {
+    if (showSearchFixed && typeof window !== 'undefined') {
       document.addEventListener("keydown", handleKeyDown);
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      if (typeof window !== 'undefined') {
+        document.removeEventListener("keydown", handleKeyDown);
+      }
     };
   }, [showSearchFixed]);
+
+  const openModal = (imageUrl: string, allImages?: string[], productTitle?: string) => {
+    if (allImages && allImages.length > 0) {
+      const currentIndex = allImages.findIndex(img => img === imageUrl);
+      setModalData({
+        images: allImages,
+        currentIndex: currentIndex >= 0 ? currentIndex : 0,
+        productTitle: productTitle || ''
+      });
+    } else {
+      setModalData({
+        images: [imageUrl],
+        currentIndex: 0,
+        productTitle: productTitle || ''
+      });
+    }
+  };
+
+  const closeModal = () => {
+    setModalData(null);
+  };
+
+  const navigateModal = useCallback((direction: number) => {
+    if (!modalData) return;
+    
+    const newIndex = modalData.currentIndex + direction;
+    if (newIndex >= 0 && newIndex < modalData.images.length) {
+      setModalData({
+        ...modalData,
+        currentIndex: newIndex
+      });
+    }
+  }, [modalData]);
+
+  // Función para manejar ambos botones (filtros y búsqueda) - abren/cierran el GameifiedSearch fixed - Solo mobile
+  const handleSearchToggle = () => {
+    setShowSearchFixed(!showSearchFixed);
+  };
+
+  // Función para cerrar el componente fixed
+  const handleCloseFixed = () => {
+    setShowSearchFixed(false);
+  };
 
   // Función para contar filtros activos
   const getActiveFiltersCount = () => {
@@ -230,6 +215,26 @@ export default function HomePage() {
     if (searchFilters.tags && searchFilters.tags.length > 0) count++;
     return count;
   };
+
+  // Si hay error cargando productos, mostrar mensaje
+  if (productsError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center p-8">
+          <div className="text-6xl mb-4">😞</div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Error al cargar productos
+          </h2>
+          <p className="text-gray-600 mb-4">{productsError}</p>
+          <Button onClick={refetchProducts}>
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const isLoading = isLoadingProducts || isLoadingRate;
 
   // Función para renderizar una lista de productos (Mobile)
   const renderProductList = (productList: ProductWithPrices[], sectionTitle?: string) => {

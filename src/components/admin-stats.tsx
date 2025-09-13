@@ -175,7 +175,10 @@ export default function AdminStats({ onStatsChange }: AdminStatsProps) {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percentage }: any) => `${name}: ${percentage}%`}
+                    label={(props: unknown) => {
+                      const { name, percentage } = props as { name: string; percentage: number };
+                      return `${name}: ${percentage}%`;
+                    }}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
