@@ -6,7 +6,7 @@ import Image from 'next/image';
 interface ProductImageCarouselProps {
   images: string[];
   productTitle: string;
-  onImageClick: (imageUrl: string) => void;
+  onImageClick: (imageUrl: string, allImages?: string[], productTitle?: string) => void;
   className?: string;
   indicatorStyle?: 'dots' | 'bars';
 }
@@ -94,7 +94,7 @@ export default function ProductImageCarousel({
 
   const handleImageClick = () => {
     if (!isDragging && Math.abs(translateX) < 10) {
-      onImageClick(images[currentIndex]);
+      onImageClick(images[currentIndex], images, productTitle);
     }
   };
 
@@ -141,7 +141,7 @@ export default function ProductImageCarousel({
         </div>
 
         {images.length > 1 && currentIndex === 0 && !isDragging && (
-          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none lg:hidden">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="bg-white/95 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 shadow-xl animate-pulse border-2 border-white">
                 👈 Desliza para ver más 👉
@@ -176,10 +176,55 @@ export default function ProductImageCarousel({
         </div>
       )}
 
+      {/* Mobile: Page indicator */}
       {images.length > 1 && (
-        <div className="absolute top-3 left-3 bg-black/80 text-white text-sm font-bold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-lg border border-white/20">
+        <div 
+          className="absolute top-3 left-3 bg-black/80 text-white text-sm font-bold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-lg border border-white/20 carousel-page-indicator cursor-pointer hover:bg-black/90 transition-colors lg:hidden"
+          onClick={(e) => {
+            e.stopPropagation();
+            const nextIndex = (currentIndex + 1) % images.length;
+            goToSlide(nextIndex);
+          }}
+        >
           {currentIndex + 1}/{images.length}
         </div>
+      )}
+
+      {/* Desktop: Navigation buttons */}
+      {images.length > 1 && (
+        <>
+          {/* Previous Button */}
+          {currentIndex > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                goToSlide(currentIndex - 1);
+              }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 hidden lg:flex items-center justify-center transition-all shadow-lg hover:scale-110 opacity-0 group-hover:opacity-100"
+              aria-label="Imagen anterior"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+              </svg>
+            </button>
+          )}
+
+          {/* Next Button */}
+          {currentIndex < images.length - 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                goToSlide(currentIndex + 1);
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 hidden lg:flex items-center justify-center transition-all shadow-lg hover:scale-110 opacity-0 group-hover:opacity-100"
+              aria-label="Imagen siguiente"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+              </svg>
+            </button>
+          )}
+        </>
       )}
     </div>
   );
