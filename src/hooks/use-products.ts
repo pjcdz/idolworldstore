@@ -115,7 +115,6 @@ export function useProducts(filters: ProductsFilters = {}): UseProductsReturn {
           // Excluir productos ya mostrados en niveles anteriores
           if (excludedIds.size > 0) {
             const excludedIdsArray = Array.from(excludedIds);
-            console.log(`Excluding IDs in level ${levelIndex}:`, excludedIdsArray);
             levelQuery = levelQuery.not('id', 'in', `(${excludedIdsArray.join(',')})`);
           }
 
@@ -141,18 +140,15 @@ export function useProducts(filters: ProductsFilters = {}): UseProductsReturn {
           }
 
           const levelProducts = (levelData || []).map(transformProduct);
-          console.log(`Level ${levelIndex}: "${level.description}" found ${levelProducts.length} products`);
           
           if (levelProducts.length > 0) {
-            console.log(`Products in level ${levelIndex}:`, levelProducts.map(p => ({ id: p.id, title: p.title, tags: p.tags })));
+            // Log removed for production
           }
 
           // *** AGREGAR IDs a la lista de excluidos ANTES de procesarlos ***
           levelProducts.forEach(product => {
             if (!excludedIds.has(product.id)) {
               excludedIds.add(product.id);
-            } else {
-              console.warn(`Duplicate product found: ${product.id}`);
             }
           });
 
@@ -160,9 +156,6 @@ export function useProducts(filters: ProductsFilters = {}): UseProductsReturn {
           const uniqueLevelProducts = levelProducts.filter(product => {
             const isDuplicate = (levelIndex === 0 ? exactProductsData : relatedProductsData)
               .some(existing => existing.id === product.id);
-            if (isDuplicate) {
-              console.warn(`Local duplicate filtered: ${product.id}`);
-            }
             return !isDuplicate;
           });
 

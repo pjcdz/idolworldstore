@@ -1,186 +1,141 @@
-# 🎵 IdolWorldStore - K-pop Merchandise Platform
+# 🛍️ Idol World Store
 
-**IdolWorldStore** es una plataforma móvil especializada en merchandise de K-pop, diseñada exclusivamente para fans hispanos. Combina la experiencia de navegación de TikTok con mecánicas de crowdfunding para crear una comunidad donde los fans pueden descubrir, comprar y participar en group orders de sus productos favoritos.
+Una tienda online especializada en productos K-pop con panel administrativo completo.
 
-## 🌟 Características Principales
+## ✨ Características
 
-### 📱 Experiencia Mobile-First
-- **Diseño exclusivo para móvil** - Optimizado para navegación vertical
-- **Interfaz tipo TikTok** - Scroll infinito y interacciones por gestos
-- **Navegación por swipe** - Carruseles táctiles para imágenes de productos
-- **Sin soporte desktop** - Enfoque 100% en la experiencia móvil
+- 🎯 **Búsqueda gamificada** con filtros por grupo, miembro y categoría
+- 📱 **Totalmente responsivo** (móvil y escritorio) 
+- 💰 **Conversión automática** USD/ARS
+- 📊 **Panel administrativo** completo con estadísticas
+- 🔐 **Sistema de autenticación** seguro
+- 🚀 **Performance optimizada** con Next.js 15
 
-### 🛍️ Tres Secciones Principales
+## 🛠️ Tecnologías
 
-#### 1. **GOs (Group Orders)**
-- Órdenes grupales para reducir costos de envío
-- Sistema de participación con "likes" estilo TikTok
-- Barras de progreso tipo Kickstarter
-- Indicadores de entrega bi-mensuales (1ro y 15 de cada mes)
+- **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS
+- **UI**: shadcn/ui, Lucide React, Recharts
+- **Backend**: Next.js API Routes, Supabase (PostgreSQL)
+- **Auth**: bcryptjs, JWT
+- **Testing**: Playwright
 
-#### 2. **STORE**
-- Catálogo de productos disponibles inmediatamente
-- Sistema de inventario en tiempo real
-- Carrito flotante accesible con el pulgar
-- Indicadores de stock dinámicos
+## 🚀 Instalación
 
-#### 3. **WISHes**
-- Lista de deseos comunitaria
-- Sistema de likes para validar demanda
-- Creación colaborativa de futuros productos
-- Algoritmo de popularidad para mostrar tendencias
-
-### 🎮 Sistema de Búsqueda Gamificada
-- **Paso 1:** Selección de grupo K-pop favorito
-- **Paso 2:** Elección de miembro específico o "Todos"
-- **Paso 3:** Filtrado por categoría (Albums, Light Sticks, Vinyl)
-- **Resultado:** Productos perfectamente filtrados y existentes
-
-### 🔄 Sugerencias Automáticas Rotativas
-- Lo Más Popular (por likes)
-- Recién Llegados (por fecha)
-- Solo Albums de miembros solistas
-- Colecciones por grupo
-- Light Sticks oficiales
-- Vinilos especiales
-- Mejores precios
-
-## 🚀 Comenzar el Desarrollo
-
-### Prerequisitos
-- Node.js 18+ 
-- npm, yarn, pnpm o bun
-- Base de datos Supabase configurada
-
-### Instalación
-
+1. **Clonar el repositorio**
 ```bash
-# Clonar el repositorio
 git clone https://github.com/pjcdz/idolworldstore.git
 cd idolworldstore
+```
 
-# Instalar dependencias
+2. **Instalar dependencias**
+```bash
 npm install
+```
 
-# Configurar variables de entorno
+3. **Configurar variables de entorno**
+```bash
 cp .env.example .env.local
 # Editar .env.local con tus credenciales de Supabase
+```
 
-# Ejecutar servidor de desarrollo
+4. **Ejecutar en desarrollo**
+```bash
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador móvil o usa las herramientas de desarrollador en modo móvil.
+## 📱 Panel Administrativo
 
-## 🛠️ Stack Tecnológico
+Accede a `/admin` con las credenciales:
+- **Usuario**: `zaki`
+- **Contraseña**: `sanailoveusomuch`
 
-- **Framework:** Next.js 15.3.3 con App Router
-- **React:** React 19
-- **Styling:** Tailwind CSS v4
-- **UI Components:** ShadCN/UI (29 componentes instalados)
-- **Base de Datos:** Supabase (PostgreSQL)
-- **Estado:** React Hooks nativos
-- **Autenticación:** Supabase Auth
-- **Deployment:** Vercel
+### Funcionalidades del Admin:
+- ✅ Dashboard con estadísticas en tiempo real
+- ✅ CRUD completo de productos
+- ✅ Gestión de imágenes y tags
+- ✅ Filtros avanzados
+- ✅ Borrado lógico con restauración
+- ✅ Gráficos interactivos
 
-## 📁 Estructura del Proyecto
+## 📂 Estructura del Proyecto
 
 ```
 src/
-├── app/                    # App Router de Next.js
-│   ├── api/               # Endpoints de API
-│   │   ├── exchange-rate/ # Conversión de monedas
-│   │   ├── groups/        # Grupos K-pop y miembros
-│   │   ├── likes/         # Sistema de likes
-│   │   ├── products/      # Gestión de productos
-│   │   └── tags/          # Sistema de etiquetas
-│   ├── globals.css        # Estilos globales
+├── app/
+│   ├── admin/              # Panel administrativo
+│   ├── api/               # API Routes
 │   ├── layout.tsx         # Layout principal
-│   └── page.tsx           # Página principal
-├── components/            # Componentes React
-│   ├── ui/               # Componentes ShadCN/UI
-│   ├── gamified-search.tsx    # Búsqueda gamificada
-│   ├── product-image-carousel.tsx # Carrusel de imágenes
-│   ├── delivery-indicator.tsx     # Indicador de entregas
-│   └── [otros componentes]
-├── hooks/                # Custom React Hooks
+│   └── page.tsx          # Página principal
+├── components/
+│   ├── admin-*.tsx       # Componentes del admin
+│   ├── ui/              # Componentes de UI (shadcn)
+│   └── *.tsx           # Componentes públicos
+├── hooks/
 │   ├── use-products.ts   # Hook para productos
-│   ├── use-likes.ts      # Hook para sistema de likes
-│   └── use-exchange-rate.ts # Hook para conversión
-└── lib/                  # Utilidades y configuración
-    ├── supabase.ts       # Cliente de Supabase
-    ├── utils.ts          # Utilidades generales
-    └── like-store.ts     # Store para likes
+│   └── use-exchange-rate.ts # Hook para tipo de cambio
+├── lib/
+│   ├── supabase.ts      # Cliente de Supabase
+│   └── utils.ts         # Utilidades
+└── middleware.ts        # Middleware de autenticación
 ```
 
-## 🎯 Características Implementadas
+## 🔒 Seguridad
 
-### ✅ Sistema de Group Orders (GOs)
-- Cards móviles optimizadas con imágenes grandes
-- Barras de progreso para participación
-- Sistema de likes con animaciones
-- Indicador de entrega bi-mensual
-- Badges para productos populares
+- ✅ Contraseñas hasheadas con bcrypt
+- ✅ Tokens JWT con expiración
+- ✅ Middleware de protección
+- ✅ Validación de datos
+- ✅ Sanitización de inputs
 
-### ✅ Tienda de Productos
-- Catálogo con sistema de stock dinámico
-- Carrito flotante accesible
-- Indicadores de inventario por colores
-- Sistema de likes consistente
-- Badges múltiples (Popular, Nuevo, Envío Gratis)
-
-### ✅ Sistema de Búsqueda Gamificada
-- APIs inteligentes para grupos y miembros
-- Filtros que solo muestran contenido existente
-- Estadísticas en tiempo real
-- Sugerencias rotativas automáticas
-
-### ✅ Componentes Móviles Avanzados
-- Carrusel de imágenes con swipe nativo
-- Navegación por gestos táctiles
-- Indicadores visuales mejorados
-- Animaciones suaves y feedback visual
-
-## 📖 Documentación Adicional
-
-- **[PROJECT_PLAN.md](./PROJECT_PLAN.md)** - Plan completo del proyecto y roadmap
-- **[SISTEMA_COMPLETO.md](./SISTEMA_COMPLETO.md)** - Documentación del sistema gamificado
-- **[SWIPE_CAROUSEL_UPDATE.md](./SWIPE_CAROUSEL_UPDATE.md)** - Actualización del carrusel móvil
-- **[ShadCN-context.md](./ShadCN-context.md)** - Contexto de componentes UI
-- **[PROMPT_PRODUCTOS.md](./PROMPT_PRODUCTOS.md)** - Guía para agregar productos
-
-## 🔧 Scripts Disponibles
+## 🧪 Testing
 
 ```bash
-# Desarrollo
-npm run dev          # Servidor de desarrollo
+# Ejecutar tests
+npm run test
+
+# Tests específicos
+npx playwright test desktop-store.spec.ts
+npx playwright test mobile-store.spec.ts
+```
+
+## 📦 Scripts Disponibles
+
+```bash
+npm run dev          # Desarrollo con Turbopack
 npm run build        # Build de producción
 npm run start        # Servidor de producción
-npm run lint         # Linting con ESLint
-
-# Base de datos
-npm run db:reset     # Resetear base de datos
-npm run db:seed      # Poblar con datos de ejemplo
+npm run lint         # Linter
+npm run test         # Tests con Playwright
 ```
 
-## 🌍 Variables de Entorno
+## 🔧 Configuración
 
-```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=tu_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_supabase_anon_key
+### Supabase
+Asegúrate de tener las siguientes tablas en tu base de datos:
 
-# API Externa (opcional)
-NEXT_PUBLIC_EXCHANGE_API=api_de_conversion_de_moneda
+- `products` - Productos de la tienda
+- `product_likes` - Sistema de likes
+- Funciones RPC para likes
+
+### Variables de Entorno
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima
+ADMIN_USERNAME=tu_usuario_admin
 ```
 
 ## 🚀 Deployment
 
-Este proyecto está optimizado para deployment en Vercel:
+Este proyecto está optimizado para deployar en Vercel:
 
 1. Conecta tu repositorio a Vercel
 2. Configura las variables de entorno
-3. Deploy automático en cada push a `main`
+3. Deploy automático en cada push
+
+## 📄 Licencia
+
+MIT License - ver [LICENSE](LICENSE) para más detalles.
 
 ## 🤝 Contribuir
 
@@ -190,14 +145,6 @@ Este proyecto está optimizado para deployment en Vercel:
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## 📝 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 🎵 Inspiración
-
-Creado con amor para la comunidad K-pop hispana. Combina la adicción de TikTok con la pasión por coleccionar merchandise de nuestros grupos favoritos.
-
 ---
 
-**¡Únete a la revolución del K-pop shopping! 🌟**
+**🎉 ¡Hecho con 💜 para la comunidad K-pop!**

@@ -11,7 +11,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, Plus, ExternalLink } from 'lucide-react';
 
-interface Product {
+import { Product } from '@/hooks/use-products';
+
+interface ProductFormData {
   id?: string;
   title: string;
   description: string;
@@ -21,11 +23,10 @@ interface Product {
   category: string;
   tags: string[];
   likes?: number;
-  is_active?: boolean;
 }
 
 interface ProductFormProps {
-  product?: Product;
+  product?: Partial<Product> & { id?: string };
   onSuccess: () => void;
 }
 
@@ -50,7 +51,7 @@ const COMMON_TAGS = [
 ];
 
 export default function ProductForm({ product, onSuccess }: ProductFormProps) {
-  const [formData, setFormData] = useState<Product>({
+  const [formData, setFormData] = useState<ProductFormData>({
     title: '',
     description: '',
     requester: 'Admin',
@@ -66,11 +67,21 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
 
   useEffect(() => {
     if (product) {
-      setFormData(product);
+      setFormData({
+        id: product.id,
+        title: product.title || '',
+        description: product.description || '',
+        requester: product.requester || 'Admin',
+        images: product.images || [],
+        price_usd: product.price_usd || 0,
+        category: product.category || '',
+        tags: product.tags || [],
+        likes: product.likes,
+      });
     }
   }, [product]);
 
-  const handleInputChange = (field: keyof Product, value: string | number | string[]) => {
+  const handleInputChange = (field: keyof ProductFormData, value: string | number | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
