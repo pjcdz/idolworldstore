@@ -98,46 +98,8 @@ export default function HomePage() {
     };
   }, [modalData]);
 
-  // Event listener global para abrir el componente al hacer click en cualquier parte - Solo mobile
-  useEffect(() => {
-    const handleGlobalClick = (event: MouseEvent) => {
-      // Solo funciona en mobile
-      if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-        return;
-      }
-
-      const target = event.target as HTMLElement;
-      
-      // No abrir si se hace click en el header, botones, o elementos interactivos
-      if (
-        target.closest('header') ||
-        target.closest('button') ||
-        target.closest('a') ||
-        target.closest('input') ||
-        target.closest('[role="button"]') ||
-        target.closest('.gamified-search-fixed') ||
-        target.closest('img') ||  // Evitar abrir al hacer click en imágenes
-        target.closest('[data-modal]') ||  // Evitar abrir al hacer click en elementos del modal
-        target.closest('.cursor-pointer') ||  // Evitar abrir al hacer click en elementos clickeables
-        showSearchFixed // No abrir si ya está abierto
-      ) {
-        return;
-      }
-      
-      // Abrir el componente
-      setShowSearchFixed(true);
-    };
-
-    if (typeof window !== 'undefined') {
-      document.addEventListener('click', handleGlobalClick);
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        document.removeEventListener('click', handleGlobalClick);
-      }
-    };
-  }, [showSearchFixed]);
+  // Removido: Event listener global que abría el prompt en cualquier click
+  // Ahora solo se abre desde los botones del header
 
   // Handle keyboard navigation for search fixed - Solo mobile
   useEffect(() => {
@@ -429,7 +391,7 @@ export default function HomePage() {
       </div>
 
       {/* Main Content - Responsive Layout */}
-      <main className="p-4 lg:p-8 space-y-6 relative z-0 max-w-7xl mx-auto">
+      <main className="p-4 pt-6 lg:p-8 space-y-6 relative z-0 max-w-7xl mx-auto">
         {/* Desktop Layout */}
         <div className="hidden lg:grid lg:grid-cols-12 lg:gap-8">
           {/* Left Sidebar - Filters (Desktop) */}
@@ -762,7 +724,7 @@ export default function HomePage() {
       {/* Image Modal */}
       {modalData && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
           onClick={closeModal}
           data-modal="true"
         >
@@ -863,7 +825,7 @@ export default function HomePage() {
 
       {/* Gamified Search Fixed - Solo mobile */}
       {showSearchFixed && (
-        <div className="lg:hidden fixed top-16 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-lg gamified-search-fixed animate-in slide-in-from-top-4 duration-300">
+        <div className="lg:hidden fixed top-20 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-lg gamified-search-fixed animate-in slide-in-from-top-4 duration-300">
           <div className="max-w-4xl mx-auto p-4">
             {/* Botón de cerrar */}
             <div className="flex justify-end mb-4">
