@@ -31,6 +31,9 @@ export default function HomePage() {
     tags?: string[];
   }>({});
 
+  // Estado para mostrar/ocultar el componente de búsqueda como fixed
+  const [showSearchFixed, setShowSearchFixed] = useState(false);
+
   // Obtener productos desde la base de datos con filtros
   const searchFiltersWithRelated = {
     ...searchFilters,
@@ -120,6 +123,72 @@ export default function HomePage() {
 
   const closeModal = () => {
     setModalImage(null);
+  };
+
+  // Función para manejar ambos botones (filtros y búsqueda) - abren/cierran el GameifiedSearch fixed
+  const handleSearchToggle = () => {
+    setShowSearchFixed(!showSearchFixed);
+  };
+
+  // Función para cerrar el componente fixed
+  const handleCloseFixed = () => {
+    setShowSearchFixed(false);
+  };
+
+  // Event listener global para abrir el componente al hacer click en cualquier parte
+  useEffect(() => {
+    const handleGlobalClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // No abrir si se hace click en el header, botones, o elementos interactivos
+      if (
+        target.closest('header') ||
+        target.closest('button') ||
+        target.closest('a') ||
+        target.closest('input') ||
+        target.closest('[role="button"]') ||
+        target.closest('.gamified-search-fixed') ||
+        showSearchFixed // No abrir si ya está abierto
+      ) {
+        return;
+      }
+      
+      // Abrir el componente
+      setShowSearchFixed(true);
+    };
+
+    document.addEventListener('click', handleGlobalClick);
+    
+    return () => {
+      document.removeEventListener('click', handleGlobalClick);
+    };
+  }, [showSearchFixed]);
+
+  // Handle keyboard navigation for search fixed
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (showSearchFixed && event.key === "Escape") {
+        handleCloseFixed();
+      }
+    };
+
+    if (showSearchFixed) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showSearchFixed]);
+
+  // Función para contar filtros activos
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (searchFilters.group) count++;
+    if (searchFilters.member && searchFilters.member !== 'ALL') count++;
+    if (searchFilters.category && searchFilters.category !== 'ALL') count++;
+    if (searchFilters.tags && searchFilters.tags.length > 0) count++;
+    return count;
   };
 
   // Función para renderizar una lista de productos
@@ -220,19 +289,17 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <Header
-        leftIcon="store"
         secondIcon="filter_list"
         rightIcon="search"
-        secondIconAction={() => console.log("Filter clicked")}
-        rightIconAction={() => console.log("Search clicked")}
-        userIconAction={() => console.log("Profile clicked")}
+        secondIconAction={handleSearchToggle}
+        rightIconAction={handleSearchToggle}
+        secondIconActive={showSearchFixed}
+        rightIconActive={showSearchFixed}
+        secondIconBadge={getActiveFiltersCount()}
       />
 
       {/* Main Content */}
       <main className="p-4 space-y-6 relative z-0">
-        {/* Gamified Search Component */}
-        <GameifiedSearch onFiltersChange={setSearchFilters} />
-
         {/* Product Stats */}
         <ProductStats 
           totalProducts={products.length}
@@ -408,6 +475,28 @@ export default function HomePage() {
               height={800}
               onClick={(e) => e.stopPropagation()}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Gamified Search Fixed */}
+      {showSearchFixed && (
+        <div className="fixed top-16 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-lg gamified-search-fixed animate-in slide-in-from-top-4 duration-300">
+          <div className="max-w-4xl mx-auto p-4">
+            {/* Botón de cerrar */}
+            <div className="flex justify-end mb-4">
+              <Button
+                onClick={handleCloseFixed}
+                variant="ghost"
+                size="icon"
+                className="hover:bg-gray-100 rounded-full shadow-sm"
+              >
+                <span className="material-icons text-xl">close</span>
+              </Button>
+            </div>
+            
+            {/* Componente de búsqueda con diseño original */}
+            <GameifiedSearch onFiltersChange={setSearchFilters} products={products} />
           </div>
         </div>
       )}
