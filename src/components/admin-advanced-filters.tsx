@@ -33,16 +33,21 @@ export interface ProductFilters {
 
 const CATEGORIES = [
   'all',
-  'Tech',
-  'Fashion',
-  'Home',
-  'Beauty',
-  'Sports',
-  'Books',
-  'Toys',
-  'Automotive',
-  'Health',
-  'Other'
+  'Albums',
+  'Light Sticks', 
+  'Vinyl',
+  'Accessories'
+];
+
+const KPOP_GROUPS = [
+  'TWICE', 'STRAY KIDS', 'TOMORROW X TOGETHER', 'TXT',
+  'BLACKPINK', 'NEWJEANS', 'ITZY', 'AESPA', 'IVE', 
+  '(G)I-DLE', 'LE SSERAFIM', 'NMIXX'
+];
+
+const COMMON_TAGS = [
+  'Official', 'Limited Edition', 'Exclusive', 'Set', 'Version 2', 'Standard',
+  'Photocard', 'Photobook', 'POB', 'Random', 'Digipack', 'Concert'
 ];
 
 const SORT_OPTIONS = [
@@ -68,6 +73,14 @@ export default function AdvancedFilters({ onFiltersChange, currentFilters }: Adv
         tags: [...currentFilters.tags, newTag.trim()]
       });
       setNewTag('');
+    }
+  };
+
+  const addSuggestedTag = (tag: string) => {
+    if (!currentFilters.tags.includes(tag)) {
+      updateFilters({
+        tags: [...currentFilters.tags, tag]
+      });
     }
   };
 
@@ -230,7 +243,7 @@ export default function AdvancedFilters({ onFiltersChange, currentFilters }: Adv
             {/* Tags */}
             <div>
               <Label>Etiquetas</Label>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-3 mt-2">
                 <div className="flex space-x-2">
                   <Input
                     placeholder="Agregar etiqueta..."
@@ -242,6 +255,48 @@ export default function AdvancedFilters({ onFiltersChange, currentFilters }: Adv
                     Agregar
                   </Button>
                 </div>
+                
+                {/* Tags Sugeridos */}
+                <div className="space-y-2">
+                  <div>
+                    <Label className="text-sm text-gray-600">Grupos K-pop</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {KPOP_GROUPS.map((group) => (
+                        <Button
+                          key={group}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => addSuggestedTag(group)}
+                          disabled={currentFilters.tags.includes(group)}
+                        >
+                          {group}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm text-gray-600">Tags Comunes</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {COMMON_TAGS.map((tag) => (
+                        <Button
+                          key={tag}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => addSuggestedTag(tag)}
+                          disabled={currentFilters.tags.includes(tag)}
+                        >
+                          {tag}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {currentFilters.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {currentFilters.tags.map((tag, index) => (

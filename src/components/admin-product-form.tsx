@@ -30,16 +30,36 @@ interface ProductFormProps {
 }
 
 const CATEGORIES = [
-  'Tech',
-  'Fashion',
-  'Home',
-  'Beauty',
-  'Sports',
-  'Books',
-  'Toys',
-  'Automotive',
-  'Health',
-  'Other'
+  'Albums',
+  'Light Sticks',
+  'Vinyl', 
+  'Accessories'
+];
+
+const KPOP_GROUPS = [
+  'TWICE', 'STRAY KIDS', 'TOMORROW X TOGETHER', 'TXT',
+  'BLACKPINK', 'NEWJEANS', 'ITZY', 'AESPA', 'IVE', 
+  '(G)I-DLE', 'LE SSERAFIM', 'NMIXX'
+];
+
+const GROUP_MEMBERS = {
+  'TWICE': ['NAYEON', 'JEONGYEON', 'MOMO', 'SANA', 'JIHYO', 'MINA', 'DAHYUN', 'CHAEYOUNG', 'TZUYU'],
+  'STRAY KIDS': ['BANG CHAN', 'LEE KNOW', 'CHANGBIN', 'HYUNJIN', 'HAN', 'FELIX', 'SEUNGMIN', 'I.N'],
+  'TXT': ['YEONJUN', 'SOOBIN', 'BEOMGYU', 'TAEHYUN', 'HUENINGKAI'],
+  'TOMORROW X TOGETHER': ['YEONJUN', 'SOOBIN', 'BEOMGYU', 'TAEHYUN', 'HUENINGKAI'],
+  'BLACKPINK': ['JISOO', 'JENNIE', 'ROSÉ', 'LISA'],
+  'NEWJEANS': ['MINJI', 'HANNI', 'DANIELLE', 'HAERIN', 'HYEIN'],
+  'ITZY': ['YEJI', 'LIA', 'RYUJIN', 'CHAERYEONG', 'YUNA'],
+  'AESPA': ['KARINA', 'WINTER', 'GISELLE', 'NINGNING'],
+  'IVE': ['YUJIN', 'GAEUL', 'REI', 'WONYOUNG', 'LIZ', 'LEESEO'],
+  '(G)I-DLE': ['MIYEON', 'MINNIE', 'SOYEON', 'YUQI', 'SHUHUA'],
+  'LE SSERAFIM': ['SAKURA', 'CHAEWON', 'YUNJIN', 'KAZUHA', 'EUNCHAE'],
+  'NMIXX': ['LILY', 'HAEWON', 'SULLYOON', 'JINNI', 'BAE', 'JIWOO', 'KYUJIN']
+};
+
+const COMMON_TAGS = [
+  'Official', 'Limited Edition', 'Exclusive', 'Set', 'Version 2', 'Standard',
+  'Photocard', 'Photobook', 'POB', 'Random', 'Digipack', 'Concert'
 ];
 
 export default function ProductForm({ product, onSuccess }: ProductFormProps) {
@@ -94,6 +114,15 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         tags: [...prev.tags, newTag.trim()]
       }));
       setNewTag('');
+    }
+  };
+
+  const handleAddSuggestedTag = (tag: string) => {
+    if (!formData.tags.includes(tag)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag]
+      }));
     }
   };
 
@@ -301,7 +330,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
             {/* Tags */}
             <div>
               <Label>Etiquetas</Label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex space-x-2">
                   <Input
                     value={newTag}
@@ -313,6 +342,48 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
+                
+                {/* Tags Sugeridos */}
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm text-gray-600">Grupos K-pop</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {KPOP_GROUPS.map((group) => (
+                        <Button
+                          key={group}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => handleAddSuggestedTag(group)}
+                          disabled={formData.tags.includes(group)}
+                        >
+                          {group}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm text-gray-600">Tags Comunes</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {COMMON_TAGS.map((tag) => (
+                        <Button
+                          key={tag}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => handleAddSuggestedTag(tag)}
+                          disabled={formData.tags.includes(tag)}
+                        >
+                          {tag}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {formData.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData.tags.map((tag, index) => (
