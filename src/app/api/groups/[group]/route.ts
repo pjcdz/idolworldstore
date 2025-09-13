@@ -18,15 +18,25 @@ export async function GET(request: Request, { params }: { params: Promise<{ grou
         'HAN', 'FELIX', 'SEUNGMIN', 'I.N'
       ],
       'TXT': ['YEONJUN', 'SOOBIN', 'BEOMGYU', 'TAEHYUN', 'HUENINGKAI'],
-      'TOMORROW X TOGETHER': ['YEONJUN', 'SOOBIN', 'BEOMGYU', 'TAEHYUN', 'HUENINGKAI'],
+      'BTS': ['RM', 'JIN', 'SUGA', 'J-HOPE', 'JIMIN', 'V', 'JUNGKOOK'],
       'BLACKPINK': ['JISOO', 'JENNIE', 'ROSÉ', 'LISA'],
-      'NEWJEANS': ['MINJI', 'HANNI', 'DANIELLE', 'HAERIN', 'HYEIN'],
+      'NewJeans': ['MINJI', 'HANNI', 'DANIELLE', 'HAERIN', 'HYEIN'],
       'ITZY': ['YEJI', 'LIA', 'RYUJIN', 'CHAERYEONG', 'YUNA'],
-      'AESPA': ['KARINA', 'WINTER', 'GISELLE', 'NINGNING'],
+      'aespa': ['KARINA', 'WINTER', 'GISELLE', 'NINGNING'],
       'IVE': ['YUJIN', 'GAEUL', 'REI', 'WONYOUNG', 'LIZ', 'LEESEO'],
       '(G)I-DLE': ['MIYEON', 'MINNIE', 'SOYEON', 'YUQI', 'SHUHUA'],
       'LE SSERAFIM': ['SAKURA', 'CHAEWON', 'YUNJIN', 'KAZUHA', 'EUNCHAE'],
-      'NMIXX': ['LILY', 'HAEWON', 'SULLYOON', 'JINNI', 'BAE', 'JIWOO', 'KYUJIN']
+      'SEVENTEEN': ['S.COUPS', 'JEONGHAN', 'JOSHUA', 'JUN', 'HOSHI', 'WONWOO', 'WOOZI', 'DK', 'MINGYU', 'THE8', 'SEUNGKWAN', 'VERNON', 'DINO'],
+      'KATSEYE': ['SOPHIA', 'MANON', 'DANIELA', 'LARA', 'MEGAN', 'YOONCHAE'],
+      'ENHYPEN': ['JUNGWON', 'HEESEUNG', 'JAY', 'JAKE', 'SUNGHOON', 'SUNOO', 'NI-KI'],
+      'Red Velvet': ['IRENE', 'SEULGI', 'WENDY', 'JOY', 'YERI'],
+      'Girls Generation': ['TAEYEON', 'SUNNY', 'TIFFANY', 'HYOYEON', 'YURI', 'SOOYOUNG', 'YOONA', 'SEOHYUN'],
+      'SNSD': ['TAEYEON', 'SUNNY', 'TIFFANY', 'HYOYEON', 'YURI', 'SOOYOUNG', 'YOONA', 'SEOHYUN'],
+      'NMIXX': ['LILY', 'HAEWON', 'SULLYOON', 'BAE', 'JIWOO', 'KYUJIN'],
+      'RIIZE': ['SHOTARO', 'EUNSEOK', 'SUNGCHAN', 'WONBIN', 'SEUNGHAN', 'SOHEE', 'ANTON'],
+      'KISS OF LIFE': ['JULIE', 'NATTY', 'BELLE', 'HANEUL'],
+      'FIFTY FIFTY': ['SAENA', 'SIO', 'CHANELLE', 'YEWON'],
+      'ILLIT': ['YUNAH', 'MINJU', 'MOKA', 'WONHEE', 'IROHA']
     };
 
     const members = groupMembers[groupName] || [];
