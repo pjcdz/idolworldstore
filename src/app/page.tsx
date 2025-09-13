@@ -1,27 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/header";
-import { LikeButton } from "@/components/like-button";
+import { WhatsAppButton } from "@/components/whatsapp-button";
 import { LikesLoadingSkeleton } from "@/components/likes-loading-skeleton";
-import { MobileOnlyNotice } from "@/components/mobile-only-notice";
 import { ExchangeRateIndicator } from "@/components/exchange-rate-indicator";
 import GameifiedSearch from "@/components/gamified-search";
 import ProductStats from "@/components/product-stats";
 import ProductImageCarousel from "@/components/product-image-carousel";
-import { useLikes } from "@/hooks/use-likes";
-import { useMobile } from "@/hooks/use-mobile";
 import { useProducts, type Product } from "@/hooks/use-products";
 import { useExchangeRate } from "@/hooks/use-exchange-rate";
 
 // Extender la interfaz Product para compatibilidad con el componente existente
-interface ProductWithLikes extends Product {
+interface ProductWithPrices extends Product {
   priceUSD: number; // Alias para compatibilidad
   priceARS: number; // Calculado dinámicamente
-  isLiked: boolean; // Estado local del usuario
 }
 
 export default function HomePage() {
@@ -33,7 +29,15 @@ export default function HomePage() {
     tags?: string[];
   }>({});
 
+  // Estado para mostrar/ocultar el componente de búsqueda como fixed
+  const [showSearchFixed, setShowSearchFixed] = useState(false);
+
   // Obtener productos desde la base de datos con filtros
+  const searchFiltersWithRelated = {
+    ...searchFilters,
+    include_related: true // Habilitar búsqueda progresiva
+  };
+  
   const { 
     products, 
     exactProducts,
@@ -42,86 +46,137 @@ export default function HomePage() {
     error: productsError,
     refetch: refetchProducts,
     exactCount,
-    relatedCount,
-    incrementLike,
-    decrementLike
-  } = useProducts(searchFilters);
+    relatedCount
+  } = useProducts(searchFiltersWithRelated);
 
   // Obtener tipo de cambio USD/ARS
   const { convertUsdToArs, isLoading: isLoadingRate } = useExchangeRate();
 
-  // Hook de likes simplificado - solo para estado de UI
-  const { 
-    celebratingItems, 
-    loadingLikes,
-    toggleLike: handleToggleLike, 
-    userLikes
-  } = useLikes();
-
-  // Transformar productos con estado de likes y precios calculados
-  const transformProducts = (productList: Product[]): ProductWithLikes[] => 
+  // Transformar productos con precios calculados
+  const transformProducts = (productList: Product[]): ProductWithPrices[] => 
     productList.map(product => ({
       ...product,
-      isLiked: userLikes.has(product.id), // Estado local del usuario
       priceUSD: product.price_usd, // Alias para compatibilidad
       priceARS: convertUsdToArs(product.price_usd), // Calculado dinámicamente
     }));
 
-  const exactWishes = transformProducts(exactProducts);
-  const relatedWishes = transformProducts(relatedProducts);
-  const wishes = transformProducts(products); // Para compatibilidad con el código existente
-
-  // Función de toggle optimizada que actualiza inmediatamente
-  const toggleLike = async (id: string) => {
-    const product = wishes.find(w => w.id === id);
-    if (!product) return;
-
-    try {
-      if (product.isLiked) {
-        await decrementLike(id);
-      } else {
-        await incrementLike(id);
-      }
-      
-      // Llamar al handler de UI para animaciones
-      await handleToggleLike(id);
-    } catch (error) {
-      console.error('Error toggling like:', error);
-    }
-  };
-
-  const totalLikes = wishes.reduce((sum, wish) => sum + wish.likes, 0);
+  const exactProducts_transformed = transformProducts(exactProducts);
+  const relatedProducts_transformed = transformProducts(relatedProducts);
+  const products_transformed = transformProducts(products); // Para compatibilidad con el código existente
   
-  const { isMobile, isLoading: isMobileLoading } = useMobile();
-  const [showMobileNotice, setShowMobileNotice] = useState(false);
-  
-  const [modalImage, setModalImage] = useState<string | null>(null);
-
-  // Show mobile notice for non-mobile users
-  useEffect(() => {
-    if (!isMobileLoading && !isMobile) {
-      setShowMobileNotice(true);
-    }
-  }, [isMobile, isMobileLoading]);
+  // Modal state for image gallery
+  const [modalData, setModalData] = useState<{
+    images: string[];
+    currentIndex: number;
+    productTitle: string;
+  } | null>(null);
 
   // Handle keyboard navigation for modal
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (modalImage && event.key === "Escape") {
-        closeModal();
+      if (modalData) {
+        if (event.key === "Escape") {
+          closeModal();
+        } else if (event.key === "ArrowLeft") {
+          navigateModal(-1);
+        } else if (event.key === "ArrowRight") {
+          navigateModal(1);
+        }
       }
     };
 
-    if (modalImage) {
+    if (modalData && typeof window !== 'undefined') {
       document.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      if (typeof window !== 'undefined') {
+        document.removeEventListener("keydown", handleKeyDown);
+        document.body.style.overflow = "unset";
+      }
     };
-  }, [modalImage]);
+  }, [modalData]);
+
+  // Removido: Event listener global que abría el prompt en cualquier click
+  // Ahora solo se abre desde los botones del header
+
+  // Handle keyboard navigation for search fixed - Solo mobile
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Solo funciona en mobile
+      if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+        return;
+      }
+      
+      if (showSearchFixed && event.key === "Escape") {
+        handleCloseFixed();
+      }
+    };
+
+    if (showSearchFixed && typeof window !== 'undefined') {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, [showSearchFixed]);
+
+  const openModal = (imageUrl: string, allImages?: string[], productTitle?: string) => {
+    if (allImages && allImages.length > 0) {
+      const currentIndex = allImages.findIndex(img => img === imageUrl);
+      setModalData({
+        images: allImages,
+        currentIndex: currentIndex >= 0 ? currentIndex : 0,
+        productTitle: productTitle || ''
+      });
+    } else {
+      setModalData({
+        images: [imageUrl],
+        currentIndex: 0,
+        productTitle: productTitle || ''
+      });
+    }
+  };
+
+  const closeModal = () => {
+    setModalData(null);
+  };
+
+  const navigateModal = useCallback((direction: number) => {
+    if (!modalData) return;
+    
+    const newIndex = modalData.currentIndex + direction;
+    if (newIndex >= 0 && newIndex < modalData.images.length) {
+      setModalData({
+        ...modalData,
+        currentIndex: newIndex
+      });
+    }
+  }, [modalData]);
+
+  // Función para manejar ambos botones (filtros y búsqueda) - abren/cierran el GameifiedSearch fixed - Solo mobile
+  const handleSearchToggle = () => {
+    setShowSearchFixed(!showSearchFixed);
+  };
+
+  // Función para cerrar el componente fixed
+  const handleCloseFixed = () => {
+    setShowSearchFixed(false);
+  };
+
+  // Función para contar filtros activos
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (searchFilters.group) count++;
+    if (searchFilters.member && searchFilters.member !== 'ALL') count++;
+    if (searchFilters.category && searchFilters.category !== 'ALL') count++;
+    if (searchFilters.tags && searchFilters.tags.length > 0) count++;
+    return count;
+  };
 
   // Si hay error cargando productos, mostrar mensaje
   if (productsError) {
@@ -143,30 +198,13 @@ export default function HomePage() {
 
   const isLoading = isLoadingProducts || isLoadingRate;
 
-  const openModal = (imageUrl: string) => {
-    setModalImage(imageUrl);
-  };
-
-  const closeModal = () => {
-    setModalImage(null);
-  };
-
-  const createWish = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    e?.stopPropagation();
-    // Add celebration and feedback for the button
-    const button = document.querySelector(`[data-create-wish]`);
-    button?.classList.add("create-celebrate");
-    setTimeout(() => button?.classList.remove("create-celebrate"), 800);
-  };
-
-  // Función para renderizar una lista de productos
-  const renderProductList = (productList: ProductWithLikes[], sectionTitle?: string) => {
+  // Función para renderizar una lista de productos (Mobile)
+  const renderProductList = (productList: ProductWithPrices[], sectionTitle?: string) => {
     if (productList.length === 0) return null;
 
     return (
       <>
-        {sectionTitle && sectionTitle !== 'exact' && (
+        {sectionTitle && sectionTitle !== 'exact' && sectionTitle !== 'related' && (
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
             <h3 className="text-lg font-semibold text-gray-700 px-4 bg-gray-50 rounded-full">
@@ -176,112 +214,78 @@ export default function HomePage() {
           </div>
         )}
         
-        {productList.map((wish, index) => {
-          const isCelebrating = celebratingItems.has(wish.id);
-          const isLoadingLike = loadingLikes.has(wish.id);
-          
+        {productList.map((product, index) => {
           // Crear clave única combinando ID con contexto de la sección
-          const uniqueKey = sectionTitle ? `${sectionTitle}-${wish.id}-${index}` : `${wish.id}-${index}`;
+          const uniqueKey = sectionTitle ? `${sectionTitle}-${product.id}-${index}` : `${product.id}-${index}`;
 
           return (
             <div
               key={uniqueKey}
-              className={`bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-out card-hover transform border border-gray-200/50 mb-6 ${
-                isCelebrating ? "scale-105" : ""
-              }`}
+              className="bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-out hover:transform hover:-translate-y-1.5 hover:shadow-xl border border-gray-200/50 mb-6 flex flex-col"
             >
             {/* Image Carousel Section */}
             <div className="relative">
               <ProductImageCarousel
-                images={wish.images}
-                productTitle={wish.title}
+                images={product.images}
+                productTitle={product.title}
                 onImageClick={openModal}
                 className="relative"
               />
 
-              {/* Likes Counter - Top Right */}
+              {/* WhatsApp Button - Top Right */}
               <div className="absolute top-3 right-3">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleLike(wish.id);
-                  }}
-                  disabled={isLoadingLike}
-                  className={`bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 
-                    transition-all duration-300 ease-out hover:bg-black/70 hover:scale-110 active:scale-95
-                    ${isLoadingLike ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
-                    ${isCelebrating ? 'heart-celebrate' : ''}
-                    focus:outline-none focus:ring-2 focus:ring-pink-400/50`}
-                  aria-label={wish.isLiked ? "Quitar like" : "Dar like"}
-                >
-                  <span className={`material-icons text-sm transition-all duration-200
-                    ${wish.isLiked ? 'text-pink-400' : 'text-pink-300'}`}>
-                    {isLoadingLike ? "hourglass_empty" : "favorite"}
-                  </span>
-                  <span className="text-white text-sm font-semibold likes-counter">
-                    {wish.likes}
-                  </span>
-                </button>
+                <WhatsAppButton 
+                  product={product}
+                  variant="icon"
+                />
               </div>
             </div>
 
             {/* Content Section */}
-            <div className="p-5">
+            <div className="p-5 flex flex-col flex-grow">
               <div className="mb-2">
                 <Badge
                   variant="outline"
                   className="text-xs text-gray-600 mb-2"
                 >
-                  {wish.category}
+                  {product.category}
                 </Badge>
               </div>
 
               <h2
                 className="text-lg font-semibold text-gray-900 mb-2 leading-tight"
-                title={wish.title}
+                title={product.title}
               >
-                {wish.title}
+                {product.title}
               </h2>
 
-              {wish.description && (
+              {product.description && (
                 <p className="text-sm text-gray-700 mb-3">
-                  {wish.description}
+                  {product.description}
                 </p>
               )}
 
-              {/* Price and Time Section */}
-              <div className="flex justify-between items-center mb-4">
+              {/* Price Section */}
+              <div className="flex justify-between items-center mb-4 flex-grow">
                 <div className="text-gray-900">
                   <div className="flex items-center gap-3">
                     <span className="text-lg font-bold text-purple-600">
-                      ${wish.priceUSD} USD
+                      ${product.priceUSD} USD
                     </span>
                     <span className="text-sm text-gray-600">
-                      ≈ ${wish.priceARS.toLocaleString()} ARS
+                      ≈ ${product.priceARS.toLocaleString()} ARS
                     </span>
                   </div>
                 </div>
-
-                <LikeButton
-                  id={wish.id}
-                  isLiked={wish.isLiked}
-                  onLike={toggleLike}
-                  isLoading={isLoadingLike}
-                  isCelebrating={isCelebrating}
-                  variant="heart"
-                />
               </div>
 
-              {/* Support Button */}
-              <LikeButton
-                id={wish.id}
-                isLiked={wish.isLiked}
-                onLike={toggleLike}
-                isLoading={isLoadingLike}
-                isCelebrating={isCelebrating}
-                variant="button"
-              />
+              {/* WhatsApp Contact Button - Siempre al final */}
+              <div className="mt-auto">
+                <WhatsAppButton 
+                  product={product}
+                  variant="button"
+                />
+              </div>
             </div>
           </div>
           );
@@ -290,374 +294,278 @@ export default function HomePage() {
     );
   };
 
+  // Función para renderizar grid de productos (Desktop)
+  const renderProductGrid = (productList: ProductWithPrices[]) => {
+    if (productList.length === 0) return null;
+
+    return productList.map((product, index) => {
+      const uniqueKey = `grid-${product.id}-${index}`;
+
+      return (
+        <div
+          key={uniqueKey}
+          className="bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-out hover:transform hover:-translate-y-1.5 hover:shadow-xl border border-gray-200/50 flex flex-col h-full"
+        >
+          {/* Image Carousel Section */}
+          <div className="relative">
+            <ProductImageCarousel
+              images={product.images}
+              productTitle={product.title}
+              onImageClick={openModal}
+              className="relative"
+            />
+
+            {/* WhatsApp Button - Top Right */}
+            <div className="absolute top-3 right-3">
+              <WhatsAppButton 
+                product={product}
+                variant="icon"
+              />
+            </div>
+          </div>
+
+          {/* Content Section */}
+          <div className="p-5 flex flex-col flex-grow">
+            <div className="mb-2">
+              <Badge
+                variant="outline"
+                className="text-xs text-gray-600 mb-2"
+              >
+                {product.category}
+              </Badge>
+            </div>
+
+            <h2
+              className="text-lg font-semibold text-gray-900 mb-2 leading-tight line-clamp-2"
+              title={product.title}
+            >
+              {product.title}
+            </h2>
+
+            {product.description && (
+              <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+                {product.description}
+              </p>
+            )}
+
+            {/* Price Section */}
+            <div className="mb-4 flex-grow">
+              <div className="text-gray-900">
+                <div className="flex flex-col gap-1">
+                  <span className="text-lg font-bold text-purple-600">
+                    ${product.priceUSD} USD
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    ≈ ${product.priceARS.toLocaleString()} ARS
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* WhatsApp Contact Button - Siempre al final */}
+            <div className="mt-auto">
+              <WhatsAppButton 
+                product={product}
+                variant="button"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    });
+  };
+
   return (
-    <>
-      <style jsx global>{`
-        .image-modal {
-          animation: modalFadeIn 0.3s ease-out;
-        }
-
-        @keyframes modalFadeIn {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        .image-hover {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .image-hover:hover {
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Price styling */
-        .price-container {
-          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 12px;
-        }
-
-        .heart-icon {
-          color: #a1a1aa;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
-          overflow: visible;
-        }
-
-        .heart-icon.liked {
-          color: #a855f7;
-          filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6));
-        }
-
-        .heart-icon:active {
-          transform: scale(1.3);
-        }
-
-        /* TikTok/Instagram style heart animation */
-        .heart-celebrate {
-          animation: heart-explosion 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes heart-explosion {
-          0% {
-            transform: scale(1);
-          }
-          15% {
-            transform: scale(1.6) rotate(-5deg);
-          }
-          30% {
-            transform: scale(1.3) rotate(3deg);
-          }
-          45% {
-            transform: scale(1.5) rotate(-2deg);
-          }
-          60% {
-            transform: scale(1.2) rotate(1deg);
-          }
-          75% {
-            transform: scale(1.35) rotate(-1deg);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        /* Ripple effect like Instagram */
-        .heart-icon::before {
-          content: "";
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 0;
-          height: 0;
-          background: radial-gradient(
-            circle,
-            rgba(168, 85, 247, 0.3) 0%,
-            transparent 70%
-          );
-          border-radius: 50%;
-          transform: translate(-50%, -50%);
-          opacity: 0;
-          pointer-events: none;
-          z-index: -1;
-        }
-
-        .heart-celebrate::before {
-          animation: ripple-effect 0.8s ease-out;
-        }
-
-        @keyframes ripple-effect {
-          0% {
-            width: 0;
-            height: 0;
-            opacity: 0.8;
-          }
-          50% {
-            width: 80px;
-            height: 80px;
-            opacity: 0.4;
-          }
-          100% {
-            width: 120px;
-            height: 120px;
-            opacity: 0;
-          }
-        }
-
-        .hot-badge {
-          animation: pulse-hot 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
-        }
-
-        @keyframes pulse-hot {
-          0%,
-          100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
-          }
-          70% {
-            transform: scale(1.05);
-            box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
-          }
-        }
-
-        .recent-badge {
-          animation: shimmer 2s infinite;
-          background: linear-gradient(90deg, #10b981, #34d399, #10b981);
-          background-size: 200% 100%;
-        }
-
-        @keyframes shimmer {
-          0%,
-          100% {
-            background-position: -200% center;
-          }
-          50% {
-            background-position: 200% center;
-          }
-        }
-
-        .create-celebrate {
-          animation: create-success 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes create-success {
-          0% {
-            transform: scale(1);
-          }
-          30% {
-            transform: scale(1.1);
-          }
-          60% {
-            transform: scale(0.95);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        .card-hover:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
-            0 0 20px rgba(127, 35, 253, 0.1);
-        }
-
-        /* Enhanced floating hearts with different sizes and colors */
-        .floating-hearts {
-          position: absolute;
-          pointer-events: none;
-          z-index: 10;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-
-        .floating-heart {
-          position: absolute;
-          animation: float-up-enhanced 2s ease-out forwards;
-          font-size: 16px;
-          font-weight: bold;
-        }
-
-        .floating-heart:nth-child(1) {
-          font-size: 20px;
-          animation-duration: 1.8s;
-        }
-        .floating-heart:nth-child(2) {
-          font-size: 24px;
-          animation-duration: 2.2s;
-        }
-        .floating-heart:nth-child(3) {
-          font-size: 18px;
-          animation-duration: 2s;
-        }
-        .floating-heart:nth-child(4) {
-          font-size: 22px;
-          animation-duration: 1.9s;
-        }
-        .floating-heart:nth-child(5) {
-          font-size: 16px;
-          animation-duration: 2.1s;
-        }
-
-        @keyframes float-up-enhanced {
-          0% {
-            opacity: 1;
-            transform: translateY(0) scale(0.5) rotate(0deg);
-          }
-          15% {
-            opacity: 1;
-            transform: translateY(-20px) scale(1.2) rotate(15deg);
-          }
-          30% {
-            opacity: 0.9;
-            transform: translateY(-40px) scale(1) rotate(-10deg);
-          }
-          50% {
-            opacity: 0.7;
-            transform: translateY(-70px) scale(1.1) rotate(20deg);
-          }
-          70% {
-            opacity: 0.4;
-            transform: translateY(-100px) scale(0.9) rotate(-15deg);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(-140px) scale(0.3) rotate(25deg);
-          }
-        }
-
-        /* Sparkle effect */
-        .sparkle {
-          position: absolute;
-          width: 4px;
-          height: 4px;
-          background: #a855f7;
-          border-radius: 50%;
-          animation: sparkle-float 1.5s ease-out forwards;
-          pointer-events: none;
-        }
-
-        @keyframes sparkle-float {
-          0% {
-            opacity: 1;
-            transform: translateY(0) scale(0);
-          }
-          20% {
-            opacity: 1;
-            transform: translateY(-10px) scale(1);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(-60px) scale(0);
-          }
-        }
-
-        /* Pulse rings effect */
-        .pulse-rings {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 40px;
-          height: 40px;
-          pointer-events: none;
-          z-index: -1;
-        }
-
-        .pulse-ring {
-          position: absolute;
-          border: 2px solid rgba(168, 85, 247, 0.4);
-          border-radius: 50%;
-          animation: pulse-ring 1.5s ease-out forwards;
-        }
-
-        .pulse-ring:nth-child(1) {
-          animation-delay: 0s;
-        }
-        .pulse-ring:nth-child(2) {
-          animation-delay: 0.3s;
-        }
-        .pulse-ring:nth-child(3) {
-          animation-delay: 0.6s;
-        }
-
-        @keyframes pulse-ring {
-          0% {
-            width: 0;
-            height: 0;
-            opacity: 1;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-          }
-          100% {
-            width: 80px;
-            height: 80px;
-            opacity: 0;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-          }
-        }
-
-        .likes-counter {
-          animation: pulse-likes 2s infinite;
-        }
-
-        @keyframes pulse-likes {
-          0%,
-          100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.8;
-          }
-        }
-
-        .gradient-text {
-          background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
-          background-size: 200% 200%;
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: gradient-shift 3s ease infinite;
-        }
-
-        @keyframes gradient-shift {
-          0%,
-          100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-      `}</style>
-
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header - Solo mobile */}
+      <div className="lg:hidden">
         <Header
-          leftIcon="card_giftcard"
           secondIcon="filter_list"
           rightIcon="search"
-          secondIconAction={() => console.log("Filter clicked")}
-          rightIconAction={() => console.log("Search clicked")}
-          userIconAction={() => console.log("Profile clicked")}
+          secondIconAction={handleSearchToggle}
+          rightIconAction={handleSearchToggle}
+          secondIconActive={showSearchFixed}
+          rightIconActive={showSearchFixed}
+          secondIconBadge={getActiveFiltersCount()}
         />
+      </div>
 
-        {/* Main Content */}
-        <main className="p-4 space-y-6 relative z-0">
-          {/* Gamified Search Component */}
-          <GameifiedSearch onFiltersChange={setSearchFilters} />
+      {/* Main Content - Responsive Layout */}
+      <main className="p-4 pt-6 lg:p-8 space-y-6 relative z-0 max-w-7xl mx-auto">
+        {/* Desktop Layout */}
+        <div className="hidden lg:grid lg:grid-cols-12 lg:gap-8">
+          {/* Left Sidebar - Filters (Desktop) */}
+          <div className="lg:col-span-3">
+            <div className="sticky top-0 space-y-6">
+              {/* Product Stats */}
+              <ProductStats 
+                totalProducts={products.length}
+                selectedFilters={searchFilters}
+                isLoading={isLoadingProducts}
+              />
+              
+              {/* Search Filters */}
+              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200/50">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  <span className="material-icons text-purple-600">filter_list</span>
+                  Filtros
+                </h3>
+                <GameifiedSearch onFiltersChange={setSearchFilters} variant="sidebar" />
+              </div>
 
-          {/* Gamified Suggestions removed per request */}
+              {/* Store Info */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/50">
+                <div className="text-center">
+                  <div className="text-2xl mb-2">📱</div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    ¡Contáctanos por WhatsApp!
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                    Todos nuestros productos están disponibles para consulta.
+                    Pregunta por disponibilidad, envío y formas de pago. 💚
+                  </p>
+                  
+                  {/* Exchange Rate Indicator */}
+                  <div className="flex justify-center">
+                    <ExchangeRateIndicator 
+                      showDetails={true}
+                      className="bg-white/50 px-3 py-1.5 rounded-lg border border-green-200/30"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          {/* Main Content Area (Desktop) */}
+          <div className="lg:col-span-9">
+            {/* Store Header Banner */}
+            <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl p-8 text-white overflow-hidden mb-6">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 left-0 w-24 h-24 bg-white rounded-full -translate-x-12 -translate-y-12"></div>
+                <div className="absolute top-1/4 right-0 w-16 h-16 bg-white rounded-full translate-x-8"></div>
+                <div className="absolute bottom-0 left-1/4 w-12 h-12 bg-white rounded-full translate-y-6"></div>
+                <div className="absolute top-1/2 left-1/2 w-8 h-8 bg-white rounded-full -translate-x-4 -translate-y-4"></div>
+              </div>
+
+              {/* Content */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  {/* Left Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                        <span className="text-3xl">🛍️</span>
+                      </div>
+                      <div>
+                        <h1 className="text-4xl font-bold text-white">
+                          Idol World Store
+                        </h1>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                          <span className="text-purple-100 text-sm font-medium">
+                            Productos K-pop disponibles
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Counter */}
+                  <div className="relative shrink-0">
+                    <div className="absolute inset-0 bg-white/20 rounded-xl blur-lg"></div>
+                    <div className="relative bg-white/10 backdrop-blur-md rounded-xl px-6 py-4 border border-white/20">
+                      <div className="text-4xl font-bold bg-gradient-to-b from-white to-purple-100 bg-clip-text text-transparent text-center">
+                        {products_transformed.length}
+                      </div>
+                      <div className="text-purple-100 text-sm text-center">
+                        productos
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact WhatsApp Button */}
+                <div className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 
+                  text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 ease-out 
+                  transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-white/20
+                  focus:outline-none focus:ring-2 focus:ring-white/50 text-center">
+                  <div className="mb-3 flex items-center justify-center gap-2">
+                    <span className="text-2xl">💬</span>
+                    <span className="text-xl font-bold">¡Contáctanos por WhatsApp!</span>
+                    <span className="text-2xl">📱</span>
+                  </div>
+                  <p className="text-purple-100 text-sm leading-relaxed">
+                    Haz clic en cualquier producto para consultar disponibilidad
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Products Grid (Desktop) */}
+            {isLoading ? (
+              <LikesLoadingSkeleton />
+            ) : (
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
+                {/* Productos Exactos */}
+                {exactProducts_transformed.length > 0 && (
+                  <>
+                    {searchFilters.tags && searchFilters.tags.length > 0 && (
+                      <div className="xl:col-span-2 mb-6">
+                        <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 border border-purple-200">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-sm font-bold">✓</span>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-purple-800">
+                                Resultados exactos ({exactCount})
+                              </h3>
+                              <p className="text-sm text-purple-600">
+                                {searchFilters.tags.join(' + ')}
+                                {searchFilters.category && searchFilters.category !== 'ALL' && ` + ${searchFilters.category}`}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {renderProductGrid(exactProducts_transformed)}
+                  </>
+                )}
+
+                {/* Productos Relacionados */}
+                {relatedProducts_transformed.length > 0 && (
+                  <>
+                    <div className="xl:col-span-2 mb-6">
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-bold">~</span>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-blue-800">
+                              Productos relacionados ({relatedCount})
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {renderProductGrid(relatedProducts_transformed)}
+                  </>
+                )}
+
+                {/* Si no hay filtros, mostrar todos los productos sin secciones */}
+                {!searchFilters.tags && !searchFilters.category && 
+                  renderProductGrid(products_transformed)}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden space-y-6">
           {/* Product Stats */}
           <ProductStats 
             totalProducts={products.length}
@@ -665,7 +573,7 @@ export default function HomePage() {
             isLoading={isLoadingProducts}
           />
 
-          {/* Wishes Header Banner */}
+          {/* Store Header Banner */}
           <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-3xl p-6 text-white overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
@@ -682,17 +590,17 @@ export default function HomePage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                      <span className="text-xl">✨</span>
+                      <span className="text-xl">🛍️</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-white truncate">
-                      WISHes
+                    <h1 className="text-xl sm:text-2xl font-bold text-white drop-shadow-md leading-snug line-clamp-2">
+                      Idol World Store
                     </h1>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span className="text-purple-100 text-xs font-medium">
-                      Deseos de la comunidad
+                      Productos K-pop disponibles
                     </span>
                   </div>
                 </div>
@@ -702,39 +610,41 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-white/20 rounded-xl blur-lg"></div>
                   <div className="relative bg-white/10 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20">
                     <div className="text-2xl font-bold bg-gradient-to-b from-white to-purple-100 bg-clip-text text-transparent text-center">
-                      {totalLikes}
+                      {products_transformed.length}
                     </div>
                     <div className="text-purple-100 text-xs text-center">
-                      likes totales
+                      productos
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Create Wish Button */}
-              <Button
-                type="button"
-                onClick={createWish}
-                data-create-wish
-                className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 
-                  text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 ease-out 
-                  transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-white/20
-                  focus:outline-none focus:ring-2 focus:ring-white/50"
-              >
-                <span className="mr-3 text-xl">🌟</span>
-                <span className="text-lg">¿Qué artículo deseas?</span>
-                <span className="ml-3 text-xl">💫</span>
-              </Button>
+              {/* Contact WhatsApp Button */}
+              <div className="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 
+                text-white font-bold py-4 px-4 sm:px-6 rounded-2xl transition-all duration-300 ease-out 
+                transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-white/20
+                focus:outline-none focus:ring-2 focus:ring-white/50 text-center">
+                <div className="mb-3 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                  <div className="flex items-center gap-1">
+                    <span className="text-lg sm:text-xl">💬</span>
+                    <span className="text-base sm:text-lg font-bold">¡Contáctanos por WhatsApp!</span>
+                    <span className="text-lg sm:text-xl">📱</span>
+                  </div>
+                </div>
+                <p className="text-purple-100 text-xs sm:text-sm leading-relaxed px-2">
+                  Haz clic en cualquier producto para consultar disponibilidad
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Wishes List */}
+          {/* Products List (Mobile) */}
           {isLoading ? (
             <LikesLoadingSkeleton />
           ) : (
             <div>
               {/* Productos Exactos */}
-              {exactWishes.length > 0 && (
+              {exactProducts_transformed.length > 0 && (
                 <div>
                   {searchFilters.tags && searchFilters.tags.length > 0 && (
                     <div className="mb-6">
@@ -756,12 +666,12 @@ export default function HomePage() {
                       </div>
                     </div>
                   )}
-                  {renderProductList(exactWishes, "exact")}
+                  {renderProductList(exactProducts_transformed, "exact")}
                 </div>
               )}
 
               {/* Productos Relacionados */}
-              {relatedWishes.length > 0 && (
+              {relatedProducts_transformed.length > 0 && (
                 <div>
                   <div className="mb-6">
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
@@ -777,70 +687,163 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  {renderProductList(relatedWishes, "related")}
+                  {renderProductList(relatedProducts_transformed, "related")}
                 </div>
               )}
 
               {/* Si no hay filtros, mostrar todos los productos sin secciones */}
               {!searchFilters.tags && !searchFilters.category && 
-                renderProductList(wishes, "all")}
+                renderProductList(products_transformed, "all")}
             </div>
           )}
 
-          {/* Community Info Footer */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200/50">
+          {/* Store Info Footer (Mobile) */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/50">
             <div className="text-center">
-              <div className="text-2xl mb-2">🌟</div>
+              <div className="text-2xl mb-2">📱</div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                ¡Más deseos, más posibilidades!
+                ¡Contáctanos por WhatsApp!
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                Los deseos con más likes tienen más posibilidades de convertirse
-                en Group Orders. ¡Apoya los deseos que más te gusten! 💜
+                Todos nuestros productos están disponibles para consulta.
+                Pregunta por disponibilidad, envío y formas de pago. 💚
               </p>
               
               {/* Exchange Rate Indicator */}
               <div className="flex justify-center">
                 <ExchangeRateIndicator 
                   showDetails={true}
-                  className="bg-white/50 px-3 py-1.5 rounded-lg border border-purple-200/30"
+                  className="bg-white/50 px-3 py-1.5 rounded-lg border border-green-200/30"
                 />
               </div>
             </div>
           </div>
-        </main>
+        </div>
+      </main>
 
-        {/* Image Modal */}
-        {modalImage && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm image-modal"
-            onClick={closeModal}
-          >
-            <div className="relative max-w-4xl max-h-screen m-4">
-              <button
-                onClick={closeModal}
-                className="absolute top-4 right-4 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all shadow-lg hover:scale-110"
-              >
-                <span className="material-icons text-xl">close</span>
-              </button>
+      {/* Image Modal */}
+      {modalData && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={closeModal}
+          data-modal="true"
+        >
+          <div className="relative max-w-4xl max-h-screen m-4 animate-in zoom-in-95 duration-300">
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all shadow-lg hover:scale-110"
+            >
+              <span className="material-icons text-xl">close</span>
+            </button>
+
+            {/* Navigation Buttons (Desktop) */}
+            {modalData.images.length > 1 && (
+              <>
+                {/* Previous Button */}
+                {modalData.currentIndex > 0 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateModal(-1);
+                    }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-12 h-12 hidden md:flex items-center justify-center transition-all shadow-lg hover:scale-110"
+                  >
+                    <span className="material-icons text-2xl">chevron_left</span>
+                  </button>
+                )}
+
+                {/* Next Button */}
+                {modalData.currentIndex < modalData.images.length - 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateModal(1);
+                    }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-12 h-12 hidden md:flex items-center justify-center transition-all shadow-lg hover:scale-110"
+                  >
+                    <span className="material-icons text-2xl">chevron_right</span>
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* Image Container with Touch Support */}
+            <div 
+              className="relative touch-none select-none"
+              onTouchStart={(e) => {
+                if (modalData.images.length <= 1) return;
+                const touch = e.touches[0];
+                const startX = touch.clientX;
+                
+                const handleTouchMove = (moveE: TouchEvent) => {
+                  moveE.preventDefault();
+                };
+                
+                const handleTouchEnd = (endE: TouchEvent) => {
+                  const endTouch = endE.changedTouches[0];
+                  const deltaX = endTouch.clientX - startX;
+                  const threshold = 50;
+                  
+                  if (Math.abs(deltaX) > threshold) {
+                    if (deltaX > 0) {
+                      // Swipe right - go to previous
+                      navigateModal(-1);
+                    } else {
+                      // Swipe left - go to next
+                      navigateModal(1);
+                    }
+                  }
+                  
+                  document.removeEventListener('touchmove', handleTouchMove);
+                  document.removeEventListener('touchend', handleTouchEnd);
+                };
+                
+                document.addEventListener('touchmove', handleTouchMove, { passive: false });
+                document.addEventListener('touchend', handleTouchEnd);
+              }}
+            >
               <Image
-                src={modalImage}
-                alt="Imagen ampliada"
+                src={modalData.images[modalData.currentIndex]}
+                alt={`${modalData.productTitle} - Imagen ${modalData.currentIndex + 1}`}
                 className="max-w-full max-h-screen object-contain rounded-lg shadow-2xl"
                 width={1200}
                 height={800}
                 onClick={(e) => e.stopPropagation()}
               />
+              
+              {/* Image Counter */}
+              {modalData.images.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  {modalData.currentIndex + 1} / {modalData.images.length}
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Mobile Only Notice */}
-        <MobileOnlyNotice
-          isVisible={showMobileNotice}
-          onClose={() => setShowMobileNotice(false)}
-        />
-      </div>
-    </>
+      {/* Gamified Search Fixed - Solo mobile */}
+      {showSearchFixed && (
+        <div className="lg:hidden fixed top-20 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-lg gamified-search-fixed animate-in slide-in-from-top-4 duration-300">
+          <div className="max-w-4xl mx-auto p-4">
+            {/* Botón de cerrar */}
+            <div className="flex justify-end mb-4">
+              <Button
+                onClick={handleCloseFixed}
+                variant="ghost"
+                size="icon"
+                className="hover:bg-gray-100 rounded-full shadow-sm"
+              >
+                <span className="material-icons text-xl">close</span>
+              </Button>
+            </div>
+            
+            {/* Componente de búsqueda con diseño original */}
+            <GameifiedSearch onFiltersChange={setSearchFilters} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

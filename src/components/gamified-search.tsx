@@ -32,9 +32,10 @@ interface GameifiedSearchProps {
     category?: string;
     tags?: string[];
   }) => void;
+  variant?: 'default' | 'sidebar'; // Nueva prop para variant
 }
 
-export default function GameifiedSearch({ onFiltersChange }: GameifiedSearchProps) {
+export default function GameifiedSearch({ onFiltersChange, variant = 'default' }: GameifiedSearchProps) {
   const [step, setStep] = useState<'group' | 'member' | 'category' | 'results'>('group');
   const [selectedGroup, setSelectedGroup] = useState<string>('');
   const [selectedMember, setSelectedMember] = useState<string>('');
@@ -149,6 +150,23 @@ export default function GameifiedSearch({ onFiltersChange }: GameifiedSearchProp
   const handleMemberSelect = (memberName: string) => {
     setSelectedMember(memberName);
     setSelectedCategory('');
+    
+    // Actualizar filtros inmediatamente cuando se selecciona un miembro
+    const filters: {
+      tags: string[];
+      include_related: boolean;
+      category?: string;
+    } = {
+      tags: [selectedGroup],
+      include_related: true
+    };
+    
+    if (memberName !== 'ALL') {
+      filters.tags.push(memberName);
+    }
+    
+    onFiltersChange(filters);
+    
     fetchCategories(selectedGroup, memberName);
     setStep('category');
   };
@@ -240,6 +258,209 @@ export default function GameifiedSearch({ onFiltersChange }: GameifiedSearchProp
     }
   };
 
+  // Si es variant sidebar, usar un layout más compacto
+  if (variant === 'sidebar') {
+    return (
+      <div className="space-y-4">
+        {/* Breadcrumb y status para sidebar */}
+        {(selectedGroup || selectedMember || selectedCategory) && (
+          <div className="space-y-3">
+            {/* Status message */}
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-emerald-600">🎯</span>
+                <span className="font-medium text-emerald-800 text-sm">¡Aquí están tus productos!</span>
+              </div>
+              <p className="text-xs text-emerald-600">
+                Los productos se están mostrando según tu selección
+              </p>
+            </div>
+            
+            {/* Breadcrumb */}
+            <div className="flex flex-wrap items-center gap-1 text-xs">
+              {selectedGroup && (
+                <>
+                  <button
+                    onClick={navigateToGroup}
+                    className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors"
+                  >
+                    {selectedGroup === 'TOMORROW X TOGETHER' ? 'TXT' : selectedGroup}
+                  </button>
+                  {(selectedMember || selectedCategory) && <span className="text-gray-400">→</span>}
+                </>
+              )}
+
+              {selectedMember && selectedMember !== 'ALL' && (
+                <>
+                  <button
+                    onClick={navigateToMember}
+                    className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                    disabled={!selectedCategory}
+                  >
+                    {selectedMember}
+                  </button>
+                  {selectedCategory && <span className="text-gray-400">→</span>}
+                </>
+              )}
+
+              {selectedCategory && selectedCategory !== 'ALL' && (
+                <div className="px-2 py-1 bg-green-100 text-green-700 rounded-md">
+                  {selectedCategory}
+                </div>
+              )}
+              
+              {/* Botón reiniciar más pequeño */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={resetSearch}
+                className="ml-2 h-6 px-2 text-xs"
+              >
+                🔄 Reiniciar
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Botón para buscar algo diferente si hay filtros aplicados */}
+        {step === 'results' && (
+          <Button 
+            variant="outline" 
+            onClick={resetSearch}
+            className="w-full text-sm"
+            size="sm"
+          >
+            🔍 Buscar algo diferente
+          </Button>
+        )}
+
+        {/* Mostrar pasos solo si no hay filtros aplicados */}
+        {step === 'group' && (
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-700 text-sm">📦 ¿Qué tipo de producto buscas?</h4>
+              <p className="text-xs text-gray-500">Filtra por el tipo de producto que más te interesa</p>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-2">
+              {loading ? (
+                <div className="text-center py-4 text-sm text-gray-500">
+                  Cargando grupos...
+                </div>
+              ) : groups.length > 0 ? (
+                groups.map((group) => (
+                  <Button
+                    key={group.group_name}
+                    variant="outline"
+                    className="h-auto p-3 flex items-center justify-between hover:bg-primary hover:text-primary-foreground transition-colors text-left"
+                    onClick={() => handleGroupSelect(group.group_name)}
+                  >
+                    <span className="font-medium text-sm">
+                      {group.group_name === 'TOMORROW X TOGETHER' ? 'TXT' : group.group_name}
+                    </span>
+                    <Badge variant="secondary" className="text-xs ml-2">
+                      {formatProductCount(group.product_count)}
+                    </Badge>
+                  </Button>
+                ))
+              ) : (
+                <div className="text-center py-4 text-sm text-gray-500">
+                  No hay grupos disponibles
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {step === 'member' && (
+          <div className="space-y-3">
+            <h4 className="font-medium text-gray-700 text-sm">¿Qué tipo de producto buscas de {selectedGroup}?</h4>
+            
+            <div className="grid grid-cols-1 gap-2">
+              {loading ? (
+                <div className="text-center py-4 text-sm text-gray-500">
+                  Cargando miembros...
+                </div>
+              ) : members.length > 0 ? (
+                members.map((member) => (
+                  <Button
+                    key={member.member_name}
+                    variant={member.member_name === 'ALL' ? 'default' : 'outline'}
+                    className="h-auto p-3 flex items-center justify-between"
+                    onClick={() => handleMemberSelect(member.member_name)}
+                  >
+                    <span className="font-medium text-sm">
+                      {member.member_name === 'ALL' ? '🌟 Todos' : member.member_name}
+                    </span>
+                    <Badge variant="secondary" className="text-xs ml-2">
+                      {formatProductCount(member.product_count)}
+                    </Badge>
+                  </Button>
+                ))
+              ) : (
+                <Button
+                  variant="default"
+                  onClick={() => handleMemberSelect('ALL')}
+                  className="text-sm"
+                >
+                  Ver todos los productos
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {step === 'category' && (
+          <div className="space-y-3">
+            <h4 className="font-medium text-gray-700 text-sm">
+              ¿Qué tipo de producto buscas de {selectedGroup}
+              {selectedMember && selectedMember !== 'ALL' ? ` → ${selectedMember}` : ''}?
+            </h4>
+            
+            <div className="grid grid-cols-1 gap-2">
+              {loading ? (
+                <div className="text-center py-4 text-sm text-gray-500">
+                  Cargando categorías...
+                </div>
+              ) : categories.length > 0 ? (
+                categories.map((cat) => (
+                  <Button
+                    key={cat.category}
+                    variant={cat.category === 'ALL' ? 'default' : 'outline'}
+                    className="h-auto p-3 flex items-center justify-between hover:bg-primary hover:text-primary-foreground transition-colors"
+                    onClick={() => handleCategorySelect(cat.category)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {cat.category === 'ALL' && '🌟'}
+                        {cat.category === 'Albums' && '💿'}
+                        {cat.category === 'Light Sticks' && '🔦'}
+                        {cat.category === 'Vinyl' && '📀'}
+                        {cat.category === 'Accessories' && '🎁'}
+                        {!['ALL', 'Albums', 'Light Sticks', 'Vinyl', 'Accessories'].includes(cat.category) && '📦'}
+                      </span>
+                      <span className="font-medium text-sm">
+                        {cat.category === 'ALL' ? 'Todos' : cat.category}
+                      </span>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      {formatProductCount(cat.count)}
+                    </Badge>
+                  </Button>
+                ))
+              ) : (
+                <div className="text-center py-4 text-sm text-gray-500">
+                  No hay productos disponibles
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Layout por defecto (modal/fixed)
   return (
     <Card className="w-full max-w-4xl mx-auto mb-8">
       <CardHeader className="text-center">

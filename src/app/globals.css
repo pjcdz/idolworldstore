@@ -118,4 +118,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Asegurar que el scroll funcione correctamente con header sticky */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Para dispositivos móviles, asegurar que el viewport sea consistente */
+  @media (max-width: 768px) {
+    body {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }

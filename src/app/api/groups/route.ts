@@ -12,9 +12,11 @@ export async function GET(_request: Request) {
 
     // Lista de grupos principales de K-pop
     const mainGroups = [
-      'TWICE', 'STRAY KIDS', 'TOMORROW X TOGETHER', 
-      'BLACKPINK', 'NEWJEANS', 'ITZY', 'AESPA', 'IVE', 
-      '(G)I-DLE', 'LE SSERAFIM', 'NMIXX'
+      'TWICE', 'STRAY KIDS', 'TXT', 'BTS', 'BLACKPINK', 'aespa', 'ITZY', 
+      '(G)I-DLE', 'NewJeans', 'IVE', 'LE SSERAFIM', 'SEVENTEEN', 'KATSEYE',
+      'ENHYPEN', 'Red Velvet', 'Girls Generation', 'SNSD', 'BIGBANG', 
+      'SUPER JUNIOR', 'SHINee', 'EXO', 'NCT', 'WayV', 'RIIZE', 'NMIXX',
+      'KARA', 'KISS OF LIFE', 'FIFTY FIFTY', 'TripleS', 'ILLIT'
     ];
 
     // Remove unused query variable
